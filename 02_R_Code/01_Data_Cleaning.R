@@ -39,10 +39,12 @@ carcass_data_clean <- carcass_data_raw %>%
          total_larval_mass = tot_mass,
          carcass_weight_loss = carcass_used) %>% 
   mutate(average_larval_mass = if_else(n_larvae == 0, NA, total_larval_mass/n_larvae),
-         larval_density = n_larvae/carcass_weight,
-         efficiency = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight))
+         larval_density = if_else(n_larvae == 0, NA, n_larvae/carcass_weight),
+         efficiency = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight)) %>% 
+  mutate(date = if_else(parent_generation == 3, ymd(date), mdy(date)))
 
 view(carcass_data_clean)
 
+write_csv(carcass_data_clean, "./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
 
 
