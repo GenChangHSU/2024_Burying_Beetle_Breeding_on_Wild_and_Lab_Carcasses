@@ -38,12 +38,14 @@ carcass_data_clean <- carcass_data_raw %>%
          n_larvae = larvae,
          total_larval_mass = tot_mass,
          carcass_weight_loss = carcass_used) %>% 
-  mutate(breeding_success = if_else(n_larvae == 0, 0, 1),
+  mutate(generation_pair_id = str_c(parent_generation, pair_id, sep = "_"),
+         breeding_success = if_else(n_larvae == 0, 0, 1),
          prop_eggs_developed = if_else(clutch_size == 0, NA, n_larvae/clutch_size),
          average_larval_mass = if_else(n_larvae == 0, NA, total_larval_mass/n_larvae),
          larval_density = if_else(n_larvae == 0, NA, n_larvae/carcass_weight),
          efficiency = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight)) %>% 
-  mutate(date = if_else(parent_generation == 3, ymd(date), mdy(date)))
+  mutate(date = if_else(parent_generation == 3, ymd(date), mdy(date))) %>% 
+  relocate(generation_pair_id, .after = pair_id)
 
 view(carcass_data_clean)
 
@@ -101,6 +103,26 @@ summary_visualize_fun(var = total_larval_mass)
 summary_visualize_fun(var = carcass_weight_loss)  # a few extreme values
 
 ### (9) Breeding success
+carcass_data_clean %>%
+  group_by(carcass_type, breeding_success) %>% 
+  summarise(n = n()) %>% 
+  mutate(prop = n/sum(n))
+
+### (10) Proportion of eggs developed
+summary_visualize_fun(var = prop_eggs_developed)  # quite a few zeros; some impossible values
+
+### (11) Average larval mass
+summary_visualize_fun(var = average_larval_mass)
+
+### (12) Larval density
+summary_visualize_fun(var = larval_density)
+
+### (13) Carcass use efficiency
+summary_visualize_fun(var = efficiency)  # a few outliers
+
+
+
+
 
 
 
