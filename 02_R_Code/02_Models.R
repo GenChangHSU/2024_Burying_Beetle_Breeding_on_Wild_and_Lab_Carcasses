@@ -60,8 +60,8 @@ clutch_size_poisson_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) *
                                          family = "poisson",
                                          na.action = na.omit)
 
-lrtest(clutch_size_poisson_linear, clutch_size_poisson_quadratic)
-AIC(clutch_size_poisson_linear, clutch_size_poisson_quadratic)
+lrtest(clutch_size_poisson_linear, clutch_size_poisson_quadratic)  # quadratic model is better
+AIC(clutch_size_poisson_linear, clutch_size_poisson_quadratic)  # quadratic model is better
 
 # (2) test overdispersion
 clutch_size_poisson_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
@@ -74,7 +74,7 @@ clutch_size_nb_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carc
                                     family = "nbinom2",
                                     na.action = na.omit)
 
-lrtest(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)
+lrtest(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)  # overdispersion is significant
 AIC(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)
 
 # (3) test zero inflation
@@ -85,7 +85,7 @@ clutch_size_zi_nb_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * c
                                        na.action = na.omit)
 
 testZeroInflation(clutch_size_nb_quadratic)
-lrtest(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)
+lrtest(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)  # zero inflation is significant
 AIC(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)
 
 # (4) test the interaction term
@@ -95,12 +95,12 @@ clutch_size_zi_nb_quadratic_wo_interaction <- glmmTMB(clutch_size ~ poly(carcass
                                                       family = "nbinom2",
                                                       na.action = na.omit)
 
-lrtest(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)
+lrtest(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)  # the interaction is significant
 AIC(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)
 
 # (5) model diagnostics
 plot(simulateResiduals(clutch_size_zi_nb_quadratic))
-check_model(clutch_size_zi_nb_quadratic)
+check_model(clutch_size_zi_nb_quadratic)  # residual plot looks acceptable
 
 # (6) model significance
 clutch_size_zi_nb_quadratic_null <- glmmTMB(clutch_size ~ 1,
@@ -109,12 +109,9 @@ clutch_size_zi_nb_quadratic_null <- glmmTMB(clutch_size ~ 1,
                                             family = "nbinom2",
                                             na.action = na.omit)
 
-lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)
+lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)  # model is globally significant
 
-# (7) refit the final model using REML
-clutch_size_zi_nb_quadratic <- update(clutch_size_zi_nb_quadratic, REML = T)  # refit the
-
-# (8) coefficient significance
+# (7) coefficient significance
 summary(clutch_size_zi_nb_quadratic)
 tidy(clutch_size_zi_nb_quadratic) %>% view
 Anova(clutch_size_zi_nb_quadratic, type = 3)
