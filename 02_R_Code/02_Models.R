@@ -118,11 +118,11 @@ Anova(clutch_size_zi_nb_quadratic, type = 3)
 confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
 # (8) emmeans
-emmeans_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation <- emmeans(clutch_size_zi_nb_quadratic, "parent_generation", type = "response")
+emmeans_carcass_type_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "carcass_type", type = "response")
+emmeans_parent_generation_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "parent_generation", type = "response")
 
-pairs(regrid(emmeans_clutch_size))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_clutch_size))
+pairs(regrid(emmeans_parent_generation_clutch_size))
 
 
 # 2. Breeding success vs. carcass weight and carcass type ----------------------
@@ -172,11 +172,11 @@ Anova(breeding_success_logistic_quadratic, type = 3)
 confint(profile(breeding_success_logistic_quadratic)) %>% view
 
 # (6) emmeans
-emmeans_breeding_success <- emmeans(breeding_success_logistic_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation <- emmeans(breeding_success_logistic_quadratic, "parent_generation", type = "response")
+emmeans_carcass_type_breeding_success <- emmeans(breeding_success_logistic_quadratic, "carcass_type", type = "response")
+emmeans_parent_generation_breeding_success <- emmeans(breeding_success_logistic_quadratic, "parent_generation", type = "response")
 
-pairs(regrid(emmeans_breeding_success))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_breeding_success))
+pairs(regrid(emmeans_parent_generation_breeding_success))
 
 
 # 3. Proportion of eggs developed vs. carcass weight and carcass type ----------
@@ -238,11 +238,11 @@ Anova(prop_eggs_developed_beta_linear, type = 3)
 confint(profile(prop_eggs_developed_beta_linear)) %>% view
 
 # (6) emmeans
-emmeans_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_linear, "carcass_type", type = "response")
-emmeans_parent_generation <- emmeans(prop_eggs_developed_beta_linear, "parent_generation", type = "response")
+emmeans_carcass_type_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_linear, "carcass_type", type = "response")
+emmeans_parent_generation_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_linear, "parent_generation", type = "response")
 
-pairs(regrid(emmeans_prop_eggs_developed))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_prop_eggs_developed))
+pairs(regrid(emmeans_parent_generation_prop_eggs_developed))
 
 
 
@@ -320,11 +320,11 @@ Anova(n_larvae_zi_nb_quadratic, type = 3)
 confint(profile(n_larvae_zi_nb_quadratic)) %>% view
 
 # (8) emmeans
-emmeans_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation <- emmeans(n_larvae_zi_nb_quadratic, "parent_generation", type = "response")
+emmeans_carcass_type_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "carcass_type", type = "response")
+emmeans_parent_generation_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "parent_generation", type = "response")
 
-pairs(regrid(emmeans_n_larvae))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_n_larvae))
+pairs(regrid(emmeans_parent_generation_n_larvae))
 
 
 # 5. Total larval mass vs. carcass weight and carcass type ---------------------
@@ -374,11 +374,11 @@ Anova(total_larval_mass_gaussian_quadratic, type = 3)
 confint(profile(total_larval_mass_gaussian_quadratic)) %>% view
 
 # (6) emmeans
-emmeans_total_larval_mass <- emmeans(total_larval_mass_gaussian_quadratic, "carcass_type")
-emmeans_parent_generation <- emmeans(total_larval_mass_gaussian_quadratic, "parent_generation")
+emmeans_carcass_type_total_larval_mass <- emmeans(total_larval_mass_gaussian_quadratic, "carcass_type")
+emmeans_parent_generation_total_larval_mass <- emmeans(total_larval_mass_gaussian_quadratic, "parent_generation")
 
-pairs(regrid(emmeans_total_larval_mass))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_total_larval_mass))
+pairs(regrid(emmeans_parent_generation_total_larval_mass))
 
 
 # 6. Average larval mass vs. carcass weight and carcass type -------------------
@@ -428,11 +428,11 @@ Anova(average_larval_mass_gaussian_linear, type = 3)
 confint(profile(average_larval_mass_gaussian_linear)) %>% view
 
 # (6) emmeans
-emmeans_average_larval_mass <- emmeans(average_larval_mass_gaussian_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(average_larval_mass_gaussian_linear, "parent_generation")
+emmeans_carcass_type_average_larval_mass <- emmeans(average_larval_mass_gaussian_linear, "carcass_type")
+emmeans_parent_generation_average_larval_mass <- emmeans(average_larval_mass_gaussian_linear, "parent_generation")
 
-pairs(regrid(emmeans_average_larval_mass))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_average_larval_mass))
+pairs(regrid(emmeans_parent_generation_average_larval_mass))
 
 
 # 7. Larval density vs. carcass weight and carcass type ------------------------
@@ -482,11 +482,11 @@ Anova(larval_density_gaussian_linear, type = 3)
 confint(profile(larval_density_gaussian_linear)) %>% view
 
 # (7) emmeans
-emmeans_larval_density <- emmeans(larval_density_gaussian_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(larval_density_gaussian_linear, "parent_generation")
+emmeans_carcass_type_larval_density <- emmeans(larval_density_gaussian_linear, "carcass_type")
+emmeans_parent_generation_larval_density <- emmeans(larval_density_gaussian_linear, "parent_generation")
 
-pairs(regrid(emmeans_larval_density))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_larval_density))
+pairs(regrid(emmeans_parent_generation_larval_density))
 
 
 # 8. Carcass used vs. carcass weight and carcass type --------------------------
@@ -536,11 +536,11 @@ Anova(carcass_weight_loss_gaussian_linear, type = 3)
 confint(profile(carcass_weight_loss_gaussian_linear)) %>% view
 
 # (6) emmeans
-emmeans_carcass_weight_loss <- emmeans(carcass_weight_loss_gaussian_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(carcass_weight_loss_gaussian_linear, "parent_generation")
+emmeans_carcass_type_carcass_weight_loss <- emmeans(carcass_weight_loss_gaussian_linear, "carcass_type")
+emmeans_parent_generation_carcass_weight_loss <- emmeans(carcass_weight_loss_gaussian_linear, "parent_generation")
 
-pairs(regrid(emmeans_carcass_weight_loss))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_carcass_weight_loss))
+pairs(regrid(emmeans_parent_generation_carcass_weight_loss))
 
 
 # 9. Carcass use efficiency vs. carcass weight and carcass type ----------------
@@ -552,110 +552,56 @@ carcass_data_clean_efficiency <- carcass_data_clean %>%
   filter(efficiency < 0.5)
 
 ### Model
-# (1) Test the quadratic term (need to add parent generation as a fixed-effects variable later)
+# (1) Test the quadratic term (need to add parent generation to the model later)
 efficiency_beta_linear <- glmmTMB(efficiency ~ carcass_weight * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                          data = carcass_data_clean_efficiency,
-                                          family = beta_family("logit"),
-                                          na.action = na.omit)
+                                  data = carcass_data_clean_efficiency,
+                                  family = beta_family("logit"),
+                                  na.action = na.omit)
 
 efficiency_beta_quadratic <- glmmTMB(efficiency ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                             data = carcass_data_clean_efficiency,
-                                             family = beta_family("logit"),
-                                             na.action = na.omit)
+                                     data = carcass_data_clean_efficiency,
+                                     family = beta_family("logit"),
+                                     na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_quadratic)
-AIC(efficiency_beta_linear, efficiency_beta_quadratic)
+lrtest(efficiency_beta_linear, efficiency_beta_quadratic)  # quadratic model is not significantly better
+AIC(efficiency_beta_linear, efficiency_beta_quadratic)  # linear model is better
 
 # (2) test the interaction term
 efficiency_beta_linear_wo_interaction <- glmmTMB(efficiency ~ carcass_weight + carcass_type + male_size + female_size + (1|generation_pair_id),
-                                                         data = carcass_data_clean_efficiency,
-                                                         family = beta_family("logit"),
-                                                         na.action = na.omit)
+                                                 data = carcass_data_clean_efficiency,
+                                                 family = beta_family("logit"),
+                                                 na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)
-AIC(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)
+lrtest(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)  # interaction term is not significant
+AIC(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)  # model without the interaction term is better
 
 # (3) model diagnostics
 plot(simulateResiduals(efficiency_beta_linear))
-check_model(efficiency_beta_linear)
+check_model(efficiency_beta_linear)  # residual plot looks acceptable
 
 # (4) model significance
 efficiency_beta_linear_null <- glmmTMB(efficiency ~ 1,
-                                               data = carcass_data_clean_efficiency,
-                                               family = beta_family("logit"),
-                                               na.action = na.omit)
+                                       data = carcass_data_clean_efficiency,
+                                       family = beta_family("logit"),
+                                       na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_linear_null)
+lrtest(efficiency_beta_linear, efficiency_beta_linear_null)  # the model is globally significant
 
-# (5) refit the final model using REML
-efficiency_beta_linear <- update(efficiency_beta_linear, REML = T)  # refit the
-
-# (6) coefficient significance
+# (5) coefficient significance
 summary(efficiency_beta_linear)
 tidy(efficiency_beta_linear) %>% view
 Anova(efficiency_beta_linear, type = 3)
 confint(profile(efficiency_beta_linear)) %>% view
 
-# (7) emmeans
-emmeans_efficiency <- emmeans(efficiency_beta_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(efficiency_beta_linear, "parent_generation")
-
-pairs(regrid(emmeans_efficiency))
-pairs(regrid(emmeans_parent_generation))
-
-
-# 10. Total larval mass vs. carcass weight loss --------------------------------
-### Plot
-ggplot(carcass_data_clean, aes(x = total_larval_mass, y = carcass_weight_loss, color = carcass_type)) + 
-  geom_point() + 
-  geom_smooth(se = F) + 
-  scale_color_brewer(palette = "Set1")
-
-### Model
-# (1) test the interaction term (need to add parent generation to the model later)
-total_larval_mass_carcass_weight_loss_gaussian_linear <- glmmTMB(total_larval_mass ~ carcass_weight_loss * carcass_type + (1|generation_pair_id),
-                                                              data = carcass_data_clean,
-                                                              family = "gaussian",
-                                                              na.action = na.omit)
-
-total_larval_mass_carcass_weight_loss_gaussian_linear_wo_interaction <- glmmTMB(total_larval_mass ~ carcass_weight_loss + carcass_type + male_size + female_size + (1|generation_pair_id),
-                                                                             data = carcass_data_clean,
-                                                                             family = "gaussian",
-                                                                             na.action = na.omit)
-
-lrtest(total_larval_mass_carcass_weight_loss_gaussian_linear, total_larval_mass_carcass_weight_loss_gaussian_linear_wo_interaction)
-AIC(total_larval_mass_carcass_weight_loss_gaussian_linear, total_larval_mass_carcass_weight_loss_gaussian_linear_wo_interaction)
-
-# (2) model diagnostics
-plot(simulateResiduals(total_larval_mass_carcass_weight_loss_gaussian_linear))
-check_model(total_larval_mass_carcass_weight_loss_gaussian_linear)
-
-# (3) model significance
-total_larval_mass_carcass_weight_loss_gaussian_linear_null <- glmmTMB(total_larval_mass ~ 1,
-                                                                   data = carcass_data_clean,
-                                                                   family = "gaussian",
-                                                                   na.action = na.omit)
-
-lrtest(total_larval_mass_carcass_weight_loss_gaussian_linear, total_larval_mass_carcass_weight_loss_gaussian_linear_null)
-
-# (4) refit the final model using REML
-total_larval_mass_carcass_weight_loss_gaussian_linear <- update(total_larval_mass_carcass_weight_loss_gaussian_linear, REML = T)  # refit the
-
-# (5) coefficient significance
-summary(total_larval_mass_carcass_weight_loss_gaussian_linear)
-tidy(total_larval_mass_carcass_weight_loss_gaussian_linear) %>% view
-Anova(total_larval_mass_carcass_weight_loss_gaussian_linear, type = 3)
-confint(profile(total_larval_mass_carcass_weight_loss_gaussian_linear)) %>% view
-
 # (6) emmeans
-emmeans_carcass_type <- emmeans(total_larval_mass_carcass_weight_loss_gaussian_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(total_larval_mass_carcass_weight_loss_gaussian_linear, "parent_generation")
+emmeans_carcass_type_efficiency <- emmeans(efficiency_beta_linear, "carcass_type")
+emmeans_parent_generation_efficiency <- emmeans(efficiency_beta_linear, "parent_generation")
 
-pairs(regrid(emmeans_carcass_type))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_efficiency))
+pairs(regrid(emmeans_parent_generation_efficiency))
 
 
-# 11. Average larval mass vs. larval density -----------------------------------
+# 10. Average larval mass vs. larval density -----------------------------------
 ### Plot
 ggplot(carcass_data_clean, aes(x = average_larval_mass, y = larval_density, color = carcass_type)) + 
   geom_point() + 
@@ -674,12 +620,12 @@ average_larval_mass_larval_density_gaussian_linear_wo_interaction <- glmmTMB(ave
                                                               family = "gaussian",
                                                               na.action = na.omit)
 
-lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)
-AIC(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)
+lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # interaction term is not significant
+AIC(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # model without interaction term is slightly better
 
 # (2) model diagnostics
 plot(simulateResiduals(average_larval_mass_larval_density_gaussian_linear))
-check_model(average_larval_mass_larval_density_gaussian_linear)
+check_model(average_larval_mass_larval_density_gaussian_linear)  # residual plot looks fine
 
 # (3) model significance
 average_larval_mass_larval_density_gaussian_linear_null <- glmmTMB(average_larval_mass ~ 1,
@@ -689,21 +635,18 @@ average_larval_mass_larval_density_gaussian_linear_null <- glmmTMB(average_larva
 
 lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_null)
 
-# (4) refit the final model using REML
-average_larval_mass_larval_density_gaussian_linear <- update(average_larval_mass_larval_density_gaussian_linear, REML = T)  # refit the
-
-# (5) coefficient significance
+# (4) coefficient significance
 summary(average_larval_mass_larval_density_gaussian_linear)
 tidy(average_larval_mass_larval_density_gaussian_linear) %>% view
 Anova(average_larval_mass_larval_density_gaussian_linear, type = 3)
 confint(profile(average_larval_mass_larval_density_gaussian_linear)) %>% view
 
-# (6) emmeans
-emmeans_carcass_type <- emmeans(average_larval_mass_larval_density_gaussian_linear, "carcass_type")
-emmeans_parent_generation <- emmeans(average_larval_mass_larval_density_gaussian_linear, "parent_generation")
+# (5) emmeans
+emmeans_carcass_type_average_larval_mass_larval_density <- emmeans(average_larval_mass_larval_density_gaussian_linear, "carcass_type")
+emmeans_parent_generation_average_larval_mass_larval_density <- emmeans(average_larval_mass_larval_density_gaussian_linear, "parent_generation")
 
-pairs(regrid(emmeans_carcass_type))
-pairs(regrid(emmeans_parent_generation))
+pairs(regrid(emmeans_carcass_type_average_larval_mass_larval_density))
+pairs(regrid(emmeans_parent_generation_average_larval_mass_larval_density))
 
 
 

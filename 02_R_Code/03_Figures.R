@@ -222,6 +222,45 @@ ggsave("./03_Outputs/Figures/Carcass_Weight_Loss_Carcass_Weight.tiff", width = 5
 
 
 # 9. Carcass use efficiency vs. carcass weight and carcass type ----------------
+### Remove the outliers
+carcass_data_clean_efficiency <- carcass_data_clean %>% 
+  filter(efficiency < 0.5)
+
+ggplot(carcass_data_clean_efficiency, aes(x = carcass_weight, y = efficiency)) + 
+  geom_point(aes(color = carcass_type)) + 
+  # geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
+  geom_smooth(aes(color = carcass_type), method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = F, linetype = "dashed") +
+  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
+  labs(x = "Carcass weight (g)", y = "Carcass use efficiency", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red", linetype = "solid"))) + 
+  my_theme + 
+  theme(legend.position = c(0.85, 0.85),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"))
+
+ggsave("./03_Outputs/Figures/Efficiency_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+# 10. Average larval mass vs. larval density -----------------------------------
+ggplot(carcass_data_clean, aes(x = larval_density, y = average_larval_mass)) + 
+  geom_point(aes(color = carcass_type)) + 
+  geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
+  geom_smooth(aes(color = carcass_type), method = "lm", formula = y ~ x, se = F) +
+  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(0, 2.2), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
+  labs(x = "Larval density \n (No. of larvae/gram carcass)", y = "Average larval mass (g)", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
+  my_theme + 
+  theme(legend.position = c(0.85, 0.85),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"))
+
+ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
 
 
 
