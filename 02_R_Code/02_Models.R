@@ -493,15 +493,19 @@ pairs(regrid(emmeans_parent_generation_larval_density))
 ### Plot
 plot_relationship(carcass_weight_loss)
 
+### Only include observations with successful breeding events
+carcass_data_clean_carcass_weight_loss <- carcass_data_clean %>% 
+  filter(breeding_success == 1)
+
 ### Model
 # (1) Test the quadratic term (need to add parent generation to the model later)
 carcass_weight_loss_gaussian_linear <- glmmTMB(carcass_weight_loss ~ carcass_weight * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                               data = carcass_data_clean,
+                                               data = carcass_data_clean_carcass_weight_loss,
                                                family = "gaussian",
                                                na.action = na.omit)
 
 carcass_weight_loss_gaussian_quadratic <- glmmTMB(carcass_weight_loss ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                                  data = carcass_data_clean,
+                                                  data = carcass_data_clean_carcass_weight_loss,
                                                   family = "gaussian",
                                                   na.action = na.omit)
 
@@ -510,20 +514,20 @@ AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)
 
 # (2) test the interaction term
 carcass_weight_loss_gaussian_linear_wo_interaction <- glmmTMB(carcass_weight_loss ~ carcass_weight + carcass_type + male_size + female_size + (1|generation_pair_id),
-                                                              data = carcass_data_clean,
+                                                              data = carcass_data_clean_carcass_weight_loss,
                                                               family = "gaussian",
                                                               na.action = na.omit)
 
-lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the interaction term is significant
-AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the model with interaction term is better
+lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the interaction term is not significant
+AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the model without interaction term is better
 
 # (3) model diagnostics
 plot(simulateResiduals(carcass_weight_loss_gaussian_linear))
-check_model(carcass_weight_loss_gaussian_linear)
+check_model(carcass_weight_loss_gaussian_linear)  # residual plot looks acceptable (expect for one outlier)
 
 # (4) model significance
 carcass_weight_loss_gaussian_linear_null <- glmmTMB(carcass_weight_loss ~ 1,
-                                                    data = carcass_data_clean,
+                                                    data = carcass_data_clean_carcass_weight_loss,
                                                     family = "gaussian",
                                                     na.action = na.omit)
 
@@ -532,7 +536,7 @@ lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_
 # (5) coefficient significance
 summary(carcass_weight_loss_gaussian_linear)
 tidy(carcass_weight_loss_gaussian_linear) %>% view
-Anova(carcass_weight_loss_gaussian_linear, type = 3)
+Anova(carcass_weight_loss_gaussian_linear, type = 2)
 confint(profile(carcass_weight_loss_gaussian_linear)) %>% view
 
 # (6) emmeans
@@ -590,7 +594,7 @@ lrtest(efficiency_beta_linear, efficiency_beta_linear_null)  # the model is glob
 # (5) coefficient significance
 summary(efficiency_beta_linear)
 tidy(efficiency_beta_linear) %>% view
-Anova(efficiency_beta_linear, type = 3)
+Anova(efficiency_beta_linear, type = 2)
 confint(profile(efficiency_beta_linear)) %>% view
 
 # (6) emmeans

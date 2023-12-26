@@ -18,7 +18,6 @@ set.seed(123)
 # Libraries --------------------------------------------------------------------
 library(tidyverse)
 library(MASS)
-library(betareg)
 library(mgcv)
 
 
@@ -204,13 +203,17 @@ ggsave("./03_Outputs/Figures/Larval_Density_Carcass_Weight.tiff", width = 5, hei
 
 
 # 8. Carcass used vs. carcass weight and carcass type --------------------------
-ggplot(carcass_data_clean, aes(x = carcass_weight, y = carcass_weight_loss)) + 
+### Only include observations with successful breeding events
+carcass_data_clean_carcass_weight_loss <- carcass_data_clean %>% 
+  filter(breeding_success == 1)
+
+ggplot(carcass_data_clean_carcass_weight_loss, aes(x = carcass_weight, y = carcass_weight_loss)) + 
   geom_point(aes(color = carcass_type)) + 
   geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
   geom_smooth(aes(color = carcass_type), method = "lm", formula = y ~ x, se = F) +
   scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-1, 65), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-1, 40), expand = c(0, 0)) + 
   labs(x = "Carcass weight (g)", y = "Carcass used (g)", color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
   my_theme + 
@@ -228,8 +231,8 @@ carcass_data_clean_efficiency <- carcass_data_clean %>%
 
 ggplot(carcass_data_clean_efficiency, aes(x = carcass_weight, y = efficiency)) + 
   geom_point(aes(color = carcass_type)) + 
-  # geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = F, linetype = "dashed") +
+  geom_smooth(aes(group = carcass_type), color = NA, method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = T, show.legend = F) +
+  geom_smooth(aes(color = carcass_type), method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = F) +
   scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
@@ -259,19 +262,4 @@ ggplot(carcass_data_clean, aes(x = larval_density, y = average_larval_mass)) +
         legend.key.width = unit(0.3, "in"))
 
 ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
