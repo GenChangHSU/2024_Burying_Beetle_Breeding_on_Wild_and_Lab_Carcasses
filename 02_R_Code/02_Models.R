@@ -125,7 +125,6 @@ emmeans_parent_generation_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "p
 pairs(regrid(emmeans_carcass_type_clutch_size))
 pairs(regrid(emmeans_parent_generation_clutch_size))
 
-### Check the regression notes
 ### Check sjplot for model summary and model viz
 ### Create a template
 
