@@ -1,9 +1,9 @@
 ## -----------------------------------------------------------------------------
-## Title: Analyze the relationships between carcass attributes and beetle breeding outcomes
+## Title: Analysis of the relationships between carcass attributes and beetle breeding outcomes
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2023-12-15
+## Date: 2024-02-04
 ##
 ## Description:
 ## 1. 
@@ -43,6 +43,7 @@ plot_relationship <- function(yvar){
 ### Convert the variable "parent_generation" to a factor
 carcass_data_clean <- carcass_data_clean %>% 
   mutate(parent_generation = as.factor(parent_generation))
+
 
 # 1. Clutch size vs. carcass weight and carcass type ---------------------------
 ### Plot
@@ -88,7 +89,7 @@ testZeroInflation(clutch_size_nb_quadratic)
 lrtest(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)  # zero inflation is significant
 AIC(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)
 
-# (4) test the interaction term
+# (4) test interaction term
 clutch_size_zi_nb_quadratic_wo_interaction <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                       data = carcass_data_clean,
                                                       ziformula = ~ 1,
@@ -123,6 +124,23 @@ emmeans_parent_generation_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "p
 
 pairs(regrid(emmeans_carcass_type_clutch_size))
 pairs(regrid(emmeans_parent_generation_clutch_size))
+
+### Check the regression notes
+### Check sjplot for model summary and model viz
+### Create a template
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 2. Breeding success vs. carcass weight and carcass type ----------------------

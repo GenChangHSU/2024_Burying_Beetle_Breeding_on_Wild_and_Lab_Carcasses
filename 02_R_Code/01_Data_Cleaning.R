@@ -1,13 +1,13 @@
 ## -----------------------------------------------------------------------------
-## Title: Organize and explore the burying beetle breeding experiment data 
+## Title: Organize and explore the burying beetle breeding experiment data
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2023-12-14
+## Date: 2024-02-04
 ##
 ## Description:
-## 1. Organize the breeding experiment data
-## 2. Explore and summarize breeding experiment data
+## 1. Organize and clean the breeding experiment data
+## 2. Explore and summarize the breeding experiment data
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -15,18 +15,19 @@ set.seed(123)
 
 # Libraries --------------------------------------------------------------------
 library(tidyverse)
+library(readxl)
 
 
 # Import files -----------------------------------------------------------------
-carcass_data_raw <- read_csv("./01_Data_Raw/Carcass_Data_20231214.csv")
+carcass_data_raw <- read_xls("./01_Data_Raw/Carcass_Data_All.xls", sheet = 1)
 
 
 ############################### Code starts here ###############################
 
-# 1. Data organization ---------------------------------------------------------
+# 1. Data organization and cleaning --------------------------------------------
 carcass_data_clean <- carcass_data_raw %>% 
   select(date,
-         carcass_sp_Chinese = sp,
+         carcass_sp_Chinese = sp_chinese,
          carcass_type = tr, 
          carcass_taxon = class,
          carcass_weight = carc_wt,
@@ -41,11 +42,13 @@ carcass_data_clean <- carcass_data_raw %>%
   mutate(generation_pair_id = str_c(parent_generation, pair_id, sep = "_"),
          breeding_success = if_else(n_larvae == 0, 0, 1),
          prop_eggs_developed = if_else(clutch_size == 0, NA, n_larvae/clutch_size),
+         total_larval_mass_without_zero = if_else(n_larvae == 0, NA, total_larval_mass),
          average_larval_mass = if_else(n_larvae == 0, NA, total_larval_mass/n_larvae),
          larval_density = if_else(n_larvae == 0, NA, n_larvae/carcass_weight),
-         efficiency = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight)) %>% 
-  mutate(date = if_else(parent_generation == 3, ymd(date), mdy(date))) %>% 
-  relocate(generation_pair_id, .after = pair_id)
+         prop_carcass_used = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight)) %>% 
+  mutate(date = ymd(date)) %>%
+  relocate(generation_pair_id, .after = pair_id) %>% 
+  relocate(total_larval_mass_without_zero, .after = total_larval_mass)
 
 view(carcass_data_clean)
 
@@ -97,28 +100,31 @@ summary_visualize_fun(var = clutch_size)  # quite a few zeros
 summary_visualize_fun(var = n_larvae)  # quite a few zeros
 
 ### (7) Total larval mass
-summary_visualize_fun(var = total_larval_mass)
+summary_visualize_fun(var = total_larval_mass)  # quite a few zeros
 
-### (8) Carcass weight loss
+### (8) Total larval mass excluding zeros
+summary_visualize_fun(var = total_larval_mass_without_zero)
+
+### (9) Carcass weight loss
 summary_visualize_fun(var = carcass_weight_loss)  # a few extreme values
 
-### (9) Breeding success
+### (10) Breeding success
 carcass_data_clean %>%
   group_by(carcass_type, breeding_success) %>% 
   summarise(n = n()) %>% 
   mutate(prop = n/sum(n))
 
-### (10) Proportion of eggs developed
-summary_visualize_fun(var = prop_eggs_developed)  # quite a few zeros; some impossible values
+### (11) Proportion of eggs developed
+summary_visualize_fun(var = prop_eggs_developed)  # quite a few zeros and some impossible values
 
-### (11) Average larval mass
+### (12) Average larval mass
 summary_visualize_fun(var = average_larval_mass)
 
-### (12) Larval density
+### (13) Larval density
 summary_visualize_fun(var = larval_density)
 
-### (13) Carcass use efficiency
-summary_visualize_fun(var = efficiency)  # a few outliers
+### (14) Proportion of carcass used
+summary_visualize_fun(var = prop_carcass_used)  # some impossible values
 
 
 
