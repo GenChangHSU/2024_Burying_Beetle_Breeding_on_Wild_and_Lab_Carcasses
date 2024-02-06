@@ -6,7 +6,7 @@
 ## Date: 2024-02-04
 ##
 ## Description:
-## 1. 
+## 1. Model the relationship between clutch size vs. carcass weight and carcass type
 ## 2. 
 ##
 ##
@@ -21,10 +21,43 @@ library(DHARMa)
 library(performance)
 library(lmtest)
 library(car)
+library(sjPlot)
 library(broom)
 library(broom.mixed)
 library(emmeans)
+library(multcomp)
 
+
+# Model summary and plot functions from the package "sjPlot" -------------------
+model_summary <- function(model, model_name, transform_estimate) {
+  tab_model(model,
+            dv.labels = model_name,
+            auto.label = T,
+            show.est = T,
+            show.se = T,
+            show.ci = T,
+            show.stat = T,
+            show.p = T,
+            show.reflvl = F,
+            col.order = c("est", "se", "ci", "stat", "p"),
+            transform = transform_estimate,
+            show.zeroinf = T,
+            string.ci = "95% CI",
+            string.se = "SE",
+            string.stat = "Test statistic",
+            string.p = "P")
+}
+
+model_forest_plot <- function(model, model_name, transform_estimate) {
+  plot_model(model, 
+             sort.est = T,
+             transform = transform_estimate,
+             show.values = T,
+             show.p = T,
+             value.offset = 0.3,
+             vline.color = "red",
+             title = model_name)
+}
 
 # Import files -----------------------------------------------------------------
 carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
@@ -44,13 +77,17 @@ plot_relationship <- function(yvar){
 carcass_data_clean <- carcass_data_clean %>% 
   mutate(parent_generation = as.factor(parent_generation))
 
+### Exclude wild carcasses larger than 100 grams
+carcass_data_clean <- carcass_data_clean %>% 
+  filter(carcass_weight <= 100)
+  
 
 # 1. Clutch size vs. carcass weight and carcass type ---------------------------
 ### Plot
 plot_relationship(clutch_size)  # a quadratic relationship seems to exist
 
 ### Model
-# (1) Test the quadratic term
+# (1) test quadratic term
 clutch_size_poisson_linear <- glmmTMB(clutch_size ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                       data = carcass_data_clean,
                                       family = "poisson",
@@ -101,7 +138,7 @@ AIC(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)
 
 # (5) model diagnostics
 plot(simulateResiduals(clutch_size_zi_nb_quadratic))
-check_model(clutch_size_zi_nb_quadratic)  # residual plot looks acceptable
+check_model(clutch_size_zi_nb_quadratic)  # some patterns of heteroscedasticity
 
 # (6) model significance
 clutch_size_zi_nb_quadratic_null <- glmmTMB(clutch_size ~ 1,
@@ -112,10 +149,12 @@ clutch_size_zi_nb_quadratic_null <- glmmTMB(clutch_size ~ 1,
 
 lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)  # model is globally significant
 
-# (7) coefficient significance
+# (7) model summary
 summary(clutch_size_zi_nb_quadratic)
 tidy(clutch_size_zi_nb_quadratic) %>% view
-Anova(clutch_size_zi_nb_quadratic, type = 3)
+model_summary(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
+model_forest_plot(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
+Anova(clutch_size_zi_nb_quadratic, type = 2)
 confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
 # (8) emmeans
@@ -125,10 +164,13 @@ emmeans_parent_generation_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "p
 pairs(regrid(emmeans_carcass_type_clutch_size))
 pairs(regrid(emmeans_parent_generation_clutch_size))
 
-### Check sjplot for model summary and model viz
-### Create a template
+cld(emmeans_carcass_type_clutch_size, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_clutch_size, adjust = "Tukey", Letters = letters)
 
-
+# (9) model visualization
+plot_model(clutch_size_zi_nb_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
 
 
 
