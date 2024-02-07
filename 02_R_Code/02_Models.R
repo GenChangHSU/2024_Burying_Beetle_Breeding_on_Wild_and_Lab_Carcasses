@@ -7,7 +7,7 @@
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
-## 2. 
+## 2. Model the relationship between breeding success vs. carcass weight and carcass type
 ## 3. 
 ##
 ##
@@ -100,7 +100,7 @@ clutch_size_poisson_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) *
                                          family = "poisson",
                                          na.action = na.omit)
 
-lrtest(clutch_size_poisson_linear, clutch_size_poisson_quadratic)  # quadratic model is better
+lrtest(clutch_size_poisson_linear, clutch_size_poisson_quadratic)  # quadratic term is significant
 AIC(clutch_size_poisson_linear, clutch_size_poisson_quadratic)  # quadratic model is better
 
 # (2) test overdispersion
@@ -115,7 +115,7 @@ clutch_size_nb_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carc
                                     na.action = na.omit)
 
 lrtest(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)  # overdispersion is significant
-AIC(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)
+AIC(clutch_size_poisson_quadratic, clutch_size_nb_quadratic)  # negative binomial model is better
 
 # (3) test zero inflation
 clutch_size_zi_nb_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
@@ -126,7 +126,7 @@ clutch_size_zi_nb_quadratic <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * c
 
 testZeroInflation(clutch_size_nb_quadratic)
 lrtest(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)  # zero inflation is significant
-AIC(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)
+AIC(clutch_size_nb_quadratic, clutch_size_zi_nb_quadratic)  # zero-inflated model is significant
 
 # (4) test interaction term
 clutch_size_zi_nb_quadratic_wo_interaction <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
@@ -135,11 +135,11 @@ clutch_size_zi_nb_quadratic_wo_interaction <- glmmTMB(clutch_size ~ poly(carcass
                                                       family = "nbinom2",
                                                       na.action = na.omit)
 
-lrtest(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)  # the interaction is significant
-AIC(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)
+lrtest(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)  # interaction is not significant
+AIC(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)  # model without interaction is better
 
 # (5) model diagnostics
-plot(simulateResiduals(clutch_size_zi_nb_quadratic))
+plot(simulateResiduals(clutch_size_zi_nb_quadratic))  # some patterns of heteroscedasticity
 check_model(clutch_size_zi_nb_quadratic)  # some patterns of heteroscedasticity
 
 # (6) model significance
@@ -178,20 +178,12 @@ plot_model(clutch_size_zi_nb_quadratic,
 write_rds(clutch_size_zi_nb_quadratic, "./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic.rds")
 
 
-
-
-
-
-
-
-
-
 # 2. Breeding success vs. carcass weight and carcass type ----------------------
 ### Plot
 plot_relationship(breeding_success)  # a quadratic relationship seems to exist
 
 ### Model
-# (1) Test the quadratic term
+# (1) Test quadratic term
 breeding_success_logistic_linear <- glmmTMB(breeding_success ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                             data = carcass_data_clean,
                                             family = "binomial",
@@ -200,23 +192,23 @@ breeding_success_logistic_linear <- glmmTMB(breeding_success ~ carcass_weight * 
 breeding_success_logistic_quadratic <- glmmTMB(breeding_success ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                data = carcass_data_clean,
                                                family = "binomial",
-                                               na.action = na.omit)  # there is a model convergence issue
+                                               na.action = na.omit)
 
-lrtest(breeding_success_logistic_linear, breeding_success_logistic_quadratic)  # can't compare the two models
-AIC(breeding_success_logistic_linear, breeding_success_logistic_quadratic)  # can't compare the two models
+lrtest(breeding_success_logistic_linear, breeding_success_logistic_quadratic)  # quadratic term is significant
+AIC(breeding_success_logistic_linear, breeding_success_logistic_quadratic)  # quadratic model is better
 
-# (2) test the interaction term
+# (2) test interaction term
 breeding_success_logistic_quadratic_wo_interaction <- glmmTMB(breeding_success ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                               data = carcass_data_clean,
                                                               family = "binomial",
                                                               na.action = na.omit)
 
-lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_wo_interaction)  # can't compare the two models
-AIC(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_wo_interaction)  # can't compare the two models
+lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_wo_interaction)  # interaction is not significant
+AIC(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_wo_interaction)  #  model with interaction is not better
 
 # (3) model diagnostics
-plot(simulateResiduals(breeding_success_logistic_quadratic))  # residual plot looks acceptable
-check_model(breeding_success_logistic_quadratic)
+plot(simulateResiduals(breeding_success_logistic_quadratic))  # no obvious residual patterns
+check_model(breeding_success_logistic_quadratic)  # residual patterns acceptable
 
 # (4) model significance
 breeding_success_logistic_quadratic_null <- glmmTMB(breeding_success ~ 1,
@@ -224,13 +216,15 @@ breeding_success_logistic_quadratic_null <- glmmTMB(breeding_success ~ 1,
                                                     family = "binomial",
                                                     na.action = na.omit)
 
-lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_null)  # can't compare the two models
+lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_null)  # non-comparable because of the difference in sample sizes
 
-# (5) coefficient significance
+# (5) model summary
 summary(breeding_success_logistic_quadratic)
-tidy(breeding_success_logistic_quadratic) %>% view
-Anova(breeding_success_logistic_quadratic, type = 3)
-confint(profile(breeding_success_logistic_quadratic)) %>% view
+# tidy(clutch_size_zi_nb_quadratic) %>% view
+model_summary(breeding_success_logistic_quadratic, model_name = "Breeding success", transform_estimate = "exp")
+model_forest_plot(breeding_success_logistic_quadratic, model_name = "Breeding success", transform_estimate = "exp")
+Anova(breeding_success_logistic_quadratic, type = 2)
+# confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
 # (6) emmeans
 emmeans_carcass_type_breeding_success <- emmeans(breeding_success_logistic_quadratic, "carcass_type", type = "response")
@@ -238,6 +232,30 @@ emmeans_parent_generation_breeding_success <- emmeans(breeding_success_logistic_
 
 pairs(regrid(emmeans_carcass_type_breeding_success))
 pairs(regrid(emmeans_parent_generation_breeding_success))
+
+cld(emmeans_carcass_type_breeding_success, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_breeding_success, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(breeding_success_logistic_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (8) write the model results
+write_rds(breeding_success_logistic_quadratic, "./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 3. Proportion of eggs developed vs. carcass weight and carcass type ----------

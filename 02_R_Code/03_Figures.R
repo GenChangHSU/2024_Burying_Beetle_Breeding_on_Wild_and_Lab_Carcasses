@@ -27,6 +27,8 @@ library(ggplotify)
 # Import files -----------------------------------------------------------------
 carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
 clutch_size_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic.rds")
+breeding_success_logistic_quadratic <- read_rds("./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
+
 
 
 # ggplot theme -----------------------------------------------------------------
@@ -103,34 +105,33 @@ as.ggplot(gtable_clutch_size)
 ggsave("./03_Outputs/Figures/Clutch_Size_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # 2. Breeding success vs. carcass weight and carcass type ----------------------
-ggplot(carcass_data_clean, aes(x = carcass_weight, y = breeding_success)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "glm", formula = y ~ poly(x, 2), method.args = list(family = "binomial"), se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "glm", formula = y ~ poly(x, 2), method.args = list(family = "binomial"), se = F) +
+p_breeding_success <- plot_model(breeding_success_logistic_quadratic, 
+                                 type = "pred", 
+                                 terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = breeding_success, color = carcass_type), inherit.aes = F) + 
   scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.05, 1.05), expand = c(0, 0)) + 
-  labs(x = "Carcass weight (g)", y = "Breeding success", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.05, 1.05), expand = c(0, 0), labels = str_glue("{seq(0, 100, 25)}%")) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Probability of \n breeding success", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
 
+### Remove the legend key borders
+gtable_breeding_success <- ggplotGrob(p_breeding_success)
+gtable_breeding_success$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_breeding_success$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_breeding_success)
+
 ggsave("./03_Outputs/Figures/Breeding_Success_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+
+
+
 
 
 # 3. Proportion of eggs developed vs. carcass weight and carcass ---------------
