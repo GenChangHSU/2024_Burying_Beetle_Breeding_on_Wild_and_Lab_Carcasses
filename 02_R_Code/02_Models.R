@@ -3,11 +3,13 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-04
+## Date: 2024-02-06
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
 ## 2. 
+## 3. 
+##
 ##
 ##
 ## -----------------------------------------------------------------------------
@@ -151,11 +153,11 @@ lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)  # model i
 
 # (7) model summary
 summary(clutch_size_zi_nb_quadratic)
-tidy(clutch_size_zi_nb_quadratic) %>% view
+# tidy(clutch_size_zi_nb_quadratic) %>% view
 model_summary(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
 model_forest_plot(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
 Anova(clutch_size_zi_nb_quadratic, type = 2)
-confint(profile(clutch_size_zi_nb_quadratic)) %>% view
+# confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
 # (8) emmeans
 emmeans_carcass_type_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "carcass_type", type = "response")
@@ -172,8 +174,8 @@ plot_model(clutch_size_zi_nb_quadratic,
            type = "pred", 
            terms = c("carcass_weight [0:100]", "carcass_type"))
 
-
-
+# (10) write the model results
+write_rds(clutch_size_zi_nb_quadratic, "./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic.rds")
 
 
 
