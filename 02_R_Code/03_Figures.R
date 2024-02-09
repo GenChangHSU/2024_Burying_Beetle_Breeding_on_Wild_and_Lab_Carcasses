@@ -7,9 +7,9 @@
 ##
 ## Description:
 ## 1. Plot the relationship between clutch size vs. carcass weight and carcass type
-## 2. 
+## 2. Plot the relationship between breeding success vs. carcass weight and carcass type
 ## 3. 
-##
+## 4. 
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -28,12 +28,12 @@ library(ggplotify)
 carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
 clutch_size_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic.rds")
 breeding_success_logistic_quadratic <- read_rds("./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
-
+prop_eggs_developed_beta_quadratic <- read_rds("./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic.rds")
 
 
 # ggplot theme -----------------------------------------------------------------
 my_ggtheme <- 
-  theme(# Axis
+  theme(# axis
         axis.text.x = element_text(size = 14, color = "black", margin = margin(t = 3)),
         axis.text.y = element_text(size = 14, color = "black"),
         axis.title.x = element_text(size = 16, margin = margin(t = 10)),
@@ -41,12 +41,12 @@ my_ggtheme <-
         axis.ticks.length.x = unit(0.18, "cm"),
         axis.ticks.length.y = unit(0.15, "cm"),
                 
-        # Plot
+        # plot
         plot.title = element_text(hjust = 0.5, size = 18),
         plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),
         plot.background = element_rect(colour = "transparent"),
         
-        # Panel
+        # panel
         panel.background = element_rect(fill = "transparent"),
         panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
         panel.grid.major.x = element_blank(),
@@ -54,7 +54,7 @@ my_ggtheme <-
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank(),
         
-        # Legend
+        # legend
         legend.position = "right",
         legend.spacing.x = unit(0.2, "cm"),
         legend.spacing.y = unit(0.2, "cm"),
@@ -68,7 +68,7 @@ my_ggtheme <-
         legend.title.align = 0.5,
         legend.background = element_rect(fill = "transparent", size = 0.25, linetype = "solid", colour = "black"),
         
-        # Facet strip
+        # facet strip
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = 13, hjust = 0.5)
         )
@@ -129,11 +129,6 @@ as.ggplot(gtable_breeding_success)
 ggsave("./03_Outputs/Figures/Breeding_Success_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-
-
-
-
-
 # 3. Proportion of eggs developed vs. carcass weight and carcass ---------------
 ### Convert the zeros to 0.001 and values larger than 1 to 0.999
 carcass_data_clean_prop_eggs_developed <- carcass_data_clean %>% 
@@ -141,21 +136,31 @@ carcass_data_clean_prop_eggs_developed <- carcass_data_clean %>%
                                          prop_eggs_developed == 0 ~ 0.001,
                                          TRUE ~ prop_eggs_developed))
 
-ggplot(carcass_data_clean_prop_eggs_developed, aes(x = carcass_weight, y = prop_eggs_developed)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "gam", formula = y ~ x, se = T, method.args = list(family = betar(link = "logit")), show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = F) +
+p_prop_eggs_developed <- plot_model(prop_eggs_developed_beta_quadratic, 
+                                 type = "pred", 
+                                 terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean_prop_eggs_developed, aes(x = carcass_weight, y = prop_eggs_developed, color = carcass_type), inherit.aes = F) + 
   scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-0.05, 1.05), expand = c(0, 0)) + 
-  labs(x = "Carcass weight (g)", y = "Proportion of eggs developed", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of eggs developed", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
 
+### Remove the legend key borders
+gtable_prop_eggs_developed <- ggplotGrob(p_prop_eggs_developed)
+gtable_prop_eggs_developed$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_prop_eggs_developed$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_prop_eggs_developed)
+
 ggsave("./03_Outputs/Figures/Prop_Eggs_Developed_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+
+
 
 
 # 4. Number of larvae vs. carcass weight and carcass type ----------------------

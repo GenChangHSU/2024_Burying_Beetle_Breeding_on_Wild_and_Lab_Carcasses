@@ -8,8 +8,8 @@
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
 ## 2. Model the relationship between breeding success vs. carcass weight and carcass type
-## 3. 
-##
+## 3. Model the relationship between proportion of eggs developed vs. carcass weight and carcass type
+## 4. 
 ##
 ##
 ## -----------------------------------------------------------------------------
@@ -245,22 +245,9 @@ plot_model(breeding_success_logistic_quadratic,
 write_rds(breeding_success_logistic_quadratic, "./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # 3. Proportion of eggs developed vs. carcass weight and carcass type ----------
 ### Plot
-plot_relationship(prop_eggs_developed)  # there are some unreasonable values
+plot_relationship(prop_eggs_developed)  # there are some impossible values
 
 ### Convert the zeros to 0.001 and values larger than 1 to 0.999
 carcass_data_clean_prop_eggs_developed <- carcass_data_clean %>% 
@@ -275,7 +262,7 @@ ggplot(carcass_data_clean_prop_eggs_developed, aes(x = carcass_weight, y = prop_
   scale_color_brewer(palette = "Set1")  # a quadratic relationship seems to exist
 
 ### Model
-# (1) Test the quadratic term
+# (1) test quadratic term
 prop_eggs_developed_beta_linear <- glmmTMB(prop_eggs_developed ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                            data = carcass_data_clean_prop_eggs_developed,
                                            family = beta_family("logit"),
@@ -286,42 +273,62 @@ prop_eggs_developed_beta_quadratic <- glmmTMB(prop_eggs_developed ~ poly(carcass
                                               family = beta_family("logit"),
                                               na.action = na.omit)
 
-lrtest(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_quadratic)  # quadratic model is not better
-AIC(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_quadratic)  # linear model is slightly better
+lrtest(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_quadratic)  # quadratic model is better
+AIC(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_quadratic)  # quadratic model is better
 
-# (2) test the interaction term
-prop_eggs_developed_beta_linear_wo_interaction <- glmmTMB(prop_eggs_developed ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+# (2) test interaction term
+prop_eggs_developed_beta_quadratic_wo_interaction <- glmmTMB(prop_eggs_developed ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                           data = carcass_data_clean_prop_eggs_developed,
                                                           family = beta_family("logit"),
                                                           na.action = na.omit)
 
-lrtest(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_linear_wo_interaction)  # interaction term near significant
-AIC(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_linear_wo_interaction) # model with interaction term is slightly better
+lrtest(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_wo_interaction)  # interaction is not significant
+AIC(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_wo_interaction)  # model without interaction is better
 
 # (3) model diagnostics
-plot(simulateResiduals(prop_eggs_developed_beta_linear))  # residual plot looks fine
-check_model(prop_eggs_developed_beta_linear)
+plot(simulateResiduals(prop_eggs_developed_beta_quadratic))  # some residual patterns
+check_model(prop_eggs_developed_beta_quadratic)
 
 # (4) model significance
-prop_eggs_developed_beta_linear_null <- glmmTMB(prop_eggs_developed ~ 1,
+prop_eggs_developed_beta_quadratic_null <- glmmTMB(prop_eggs_developed ~ 1,
                                                 data = carcass_data_clean_prop_eggs_developed,
                                                 family = beta_family("logit"),
                                                 na.action = na.omit)
 
-lrtest(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_linear_null)  # model is marginally globally significant
+lrtest(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_null)  # model is globally significant
 
-# (5) coefficient significance
-summary(prop_eggs_developed_beta_linear)
-tidy(prop_eggs_developed_beta_linear) %>% view
-Anova(prop_eggs_developed_beta_linear, type = 3)
-confint(profile(prop_eggs_developed_beta_linear)) %>% view
+# (5) model summary
+summary(prop_eggs_developed_beta_quadratic)
+# tidy(prop_eggs_developed_beta_quadratic) %>% view
+model_summary(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = NULL)
+model_forest_plot(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = NULL)
+Anova(prop_eggs_developed_beta_quadratic, type = 2)
+# confint(profile(prop_eggs_developed_beta_quadratic)) %>% view
 
 # (6) emmeans
-emmeans_carcass_type_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_linear, "carcass_type", type = "response")
-emmeans_parent_generation_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_linear, "parent_generation", type = "response")
+emmeans_carcass_type_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_quadratic, "carcass_type", type = "response")
+emmeans_parent_generation_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_quadratic, "parent_generation", type = "response")
 
 pairs(regrid(emmeans_carcass_type_prop_eggs_developed))
 pairs(regrid(emmeans_parent_generation_prop_eggs_developed))
+
+cld(emmeans_carcass_type_prop_eggs_developed, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_prop_eggs_developed, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(prop_eggs_developed_beta_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (8) write the model results
+write_rds(prop_eggs_developed_beta_quadratic, "./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic.rds")
+
+
+
+
+
+
+
 
 
 
