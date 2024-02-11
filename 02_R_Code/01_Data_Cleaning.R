@@ -26,7 +26,7 @@ carcass_data_raw <- read_xls("./01_Data_Raw/Carcass_Data_All.xls", sheet = 1)
 
 # 1. Data organization and cleaning --------------------------------------------
 carcass_data_clean <- carcass_data_raw %>% 
-  select(date,
+  dplyr::select(date,
          carcass_sp_Chinese = sp_chinese,
          carcass_type = tr, 
          carcass_taxon = class,
@@ -42,13 +42,12 @@ carcass_data_clean <- carcass_data_raw %>%
   mutate(generation_pair_id = str_c(parent_generation, pair_id, sep = "_"),
          breeding_success = if_else(n_larvae == 0, 0, 1),
          prop_eggs_developed = if_else(clutch_size == 0, NA, n_larvae/clutch_size),
-         total_larval_mass_without_zero = if_else(n_larvae == 0, NA, total_larval_mass),
+         total_larval_mass = if_else(is.na(clutch_size), NA, total_larval_mass),
          average_larval_mass = if_else(n_larvae == 0, NA, total_larval_mass/n_larvae),
          larval_density = if_else(n_larvae == 0, NA, n_larvae/carcass_weight),
          prop_carcass_used = if_else(n_larvae == 0, NA, carcass_weight_loss/carcass_weight)) %>% 
   mutate(date = ymd(date)) %>%
-  relocate(generation_pair_id, .after = pair_id) %>% 
-  relocate(total_larval_mass_without_zero, .after = total_larval_mass)
+  relocate(generation_pair_id, .after = pair_id)
 
 view(carcass_data_clean)
 
@@ -102,28 +101,25 @@ summary_visualize_fun(var = n_larvae)  # quite a few zeros
 ### (7) Total larval mass
 summary_visualize_fun(var = total_larval_mass)  # quite a few zeros
 
-### (8) Total larval mass excluding zeros
-summary_visualize_fun(var = total_larval_mass_without_zero)
-
-### (9) Carcass weight loss
+### (8) Carcass weight loss
 summary_visualize_fun(var = carcass_weight_loss)  # a few extreme values
 
-### (10) Breeding success
+### (9) Breeding success
 carcass_data_clean %>%
   group_by(carcass_type, breeding_success) %>% 
   summarise(n = n()) %>% 
   mutate(prop = n/sum(n))
 
-### (11) Proportion of eggs developed
+### (10) Proportion of eggs developed
 summary_visualize_fun(var = prop_eggs_developed)  # quite a few zeros and some impossible values
 
-### (12) Average larval mass
+### (11) Average larval mass
 summary_visualize_fun(var = average_larval_mass)
 
-### (13) Larval density
+### (12) Larval density
 summary_visualize_fun(var = larval_density)
 
-### (14) Proportion of carcass used
+### (13) Proportion of carcass used
 summary_visualize_fun(var = prop_carcass_used)  # some impossible values
 
 
