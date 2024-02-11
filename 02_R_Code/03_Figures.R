@@ -3,13 +3,17 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-06
+## Date: 2024-02-10
 ##
 ## Description:
 ## 1. Plot the relationship between clutch size vs. carcass weight and carcass type
 ## 2. Plot the relationship between breeding success vs. carcass weight and carcass type
-## 3. 
-## 4. 
+## 3. Plot the relationship between proportion of eggs developed vs. carcass weight and carcass type
+## 4. Plot the relationship between number of larvae vs. carcass weight and carcass type
+## 5. 
+## 6. 
+## 7.
+##
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -20,8 +24,6 @@ library(tidyverse)
 library(sjPlot)
 library(grid)
 library(ggplotify)
-# library(MASS)
-# library(mgcv)
 
 
 # Import files -----------------------------------------------------------------
@@ -29,6 +31,7 @@ carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
 clutch_size_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic.rds")
 breeding_success_logistic_quadratic <- read_rds("./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
 prop_eggs_developed_beta_quadratic <- read_rds("./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic.rds")
+n_larvae_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
 
 
 # ggplot theme -----------------------------------------------------------------
@@ -86,7 +89,8 @@ p_clutch_size <- plot_model(clutch_size_zi_nb_quadratic,
                             type = "pred", 
                             terms = c("carcass_weight [0:100]", "carcass_type")) +
   geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = clutch_size, color = carcass_type), inherit.aes = F) + 
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-1, 75), expand = c(0, 0)) + 
   labs(title = NULL, x = "Carcass weight (g)", y = "Clutch size", color = NULL) +
@@ -110,7 +114,8 @@ p_breeding_success <- plot_model(breeding_success_logistic_quadratic,
                                  type = "pred", 
                                  terms = c("carcass_weight [0:100]", "carcass_type")) +
   geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = breeding_success, color = carcass_type), inherit.aes = F) + 
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) +
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-0.05, 1.05), expand = c(0, 0), labels = str_glue("{seq(0, 100, 25)}%")) + 
   labs(title = NULL, x = "Carcass weight (g)", y = "Probability of \n breeding success", color = NULL) +
@@ -140,7 +145,8 @@ p_prop_eggs_developed <- plot_model(prop_eggs_developed_beta_quadratic,
                                  type = "pred", 
                                  terms = c("carcass_weight [0:100]", "carcass_type")) +
   geom_point(data = carcass_data_clean_prop_eggs_developed, aes(x = carcass_weight, y = prop_eggs_developed, color = carcass_type), inherit.aes = F) + 
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-0.05, 1.05), expand = c(0, 0)) + 
   labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of eggs developed", color = NULL) +
@@ -159,26 +165,33 @@ as.ggplot(gtable_prop_eggs_developed)
 ggsave("./03_Outputs/Figures/Prop_Eggs_Developed_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-
-
-
-
 # 4. Number of larvae vs. carcass weight and carcass type ----------------------
-ggplot(carcass_data_clean, aes(x = carcass_weight, y = n_larvae)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "glm.nb", formula = y ~ poly(x, 2), se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "glm.nb", formula = y ~ poly(x, 2), se = F) +
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-1, 50), expand = c(0, 0)) + 
-  labs(x = "Carcass weight (g)", y = "Number of larvae", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+p_n_larvae <- plot_model(n_larvae_zi_nb_quadratic, 
+                         type = "pred", 
+                         terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = n_larvae, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-1, 55), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Number of larvae", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
 
+### Remove the legend key borders
+gtable_n_larvae <- ggplotGrob(p_n_larvae)
+gtable_n_larvae$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_n_larvae$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_n_larvae)
+
 ggsave("./03_Outputs/Figures/N_Larvae_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+
+
 
 
 # 5. Total larval mass vs. carcass weight and carcass type ---------------------

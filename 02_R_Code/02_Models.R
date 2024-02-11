@@ -3,14 +3,16 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-06
+## Date: 2024-02-10
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
 ## 2. Model the relationship between breeding success vs. carcass weight and carcass type
 ## 3. Model the relationship between proportion of eggs developed vs. carcass weight and carcass type
-## 4. 
-##
+## 4. Model the relationship between number of larvae vs. carcass weight and carcass type
+## 5.
+## 6. 
+## 7. 
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -324,20 +326,12 @@ plot_model(prop_eggs_developed_beta_quadratic,
 write_rds(prop_eggs_developed_beta_quadratic, "./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic.rds")
 
 
-
-
-
-
-
-
-
-
 # 4. Number of larvae vs. carcass weight and carcass type ----------------------
 ### Plot
 plot_relationship(n_larvae)  # a quadratic relationship seems to exist
 
 ### Model
-# (1) Test the quadratic term
+# (1) test quadratic term
 n_larvae_poisson_linear <- glmmTMB(n_larvae ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                    data = carcass_data_clean,
                                    family = "poisson",
@@ -348,8 +342,8 @@ n_larvae_poisson_quadratic <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carca
                                       family = "poisson",
                                       na.action = na.omit)
 
-lrtest(n_larvae_poisson_linear, n_larvae_poisson_quadratic)  # the quadratic model is better
-AIC(n_larvae_poisson_linear, n_larvae_poisson_quadratic)  # the quadratic model is better
+lrtest(n_larvae_poisson_linear, n_larvae_poisson_quadratic)  # quadratic term is significant
+AIC(n_larvae_poisson_linear, n_larvae_poisson_quadratic)  # quadratic model is better
 
 # (2) test overdispersion
 n_larvae_poisson_quadratic <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
@@ -376,19 +370,19 @@ testZeroInflation(n_larvae_nb_quadratic)
 lrtest(n_larvae_nb_quadratic, n_larvae_zi_nb_quadratic)  # zero inflation is significant
 AIC(n_larvae_nb_quadratic, n_larvae_zi_nb_quadratic)  # zero-inflated model is better
 
-# (4) test the interaction term
+# (4) test interaction term
 n_larvae_zi_nb_quadratic_wo_interaction <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                    data = carcass_data_clean,
                                                    ziformula = ~ 1,
                                                    family = "nbinom2",
                                                    na.action = na.omit)
 
-lrtest(n_larvae_zi_nb_quadratic, n_larvae_zi_nb_quadratic_wo_interaction)  # the interaction term is marginally significant
-AIC(n_larvae_zi_nb_quadratic, n_larvae_zi_nb_quadratic_wo_interaction)  # the model with the interaction term is slightly better
+lrtest(n_larvae_zi_nb_quadratic, n_larvae_zi_nb_quadratic_wo_interaction)  # interaction is significant
+AIC(n_larvae_zi_nb_quadratic, n_larvae_zi_nb_quadratic_wo_interaction)  # model with interaction is better
 
 # (5) model diagnostics
-plot(simulateResiduals(n_larvae_zi_nb_quadratic))
-check_model(n_larvae_zi_nb_quadratic)  # there are some patterns in the residual plot
+plot(simulateResiduals(n_larvae_zi_nb_quadratic))  # some patterns of heteroscedasticity
+check_model(n_larvae_zi_nb_quadratic)  # some patterns of heteroscedasticity
 
 # (6) model significance
 n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
@@ -397,13 +391,15 @@ n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
                                          family = "nbinom2",
                                          na.action = na.omit)
 
-lrtest(n_larvae_zi_nb_quadratic_null, n_larvae_zi_nb_quadratic)
+lrtest(n_larvae_zi_nb_quadratic_null, n_larvae_zi_nb_quadratic)  # non-comparable because of the difference in sample sizes
 
-# (7) coefficient significance
+# (7) model summary
 summary(n_larvae_zi_nb_quadratic)
-tidy(n_larvae_zi_nb_quadratic) %>% view
+# tidy(n_larvae_zi_nb_quadratic) %>% view
+model_summary(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
+model_forest_plot(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
 Anova(n_larvae_zi_nb_quadratic, type = 3)
-confint(profile(n_larvae_zi_nb_quadratic)) %>% view
+# confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
 # (8) emmeans
 emmeans_carcass_type_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "carcass_type", type = "response")
@@ -411,6 +407,31 @@ emmeans_parent_generation_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "parent_
 
 pairs(regrid(emmeans_carcass_type_n_larvae))
 pairs(regrid(emmeans_parent_generation_n_larvae))
+
+cld(emmeans_carcass_type_n_larvae, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_n_larvae, adjust = "Tukey", Letters = letters)
+
+# (9) model visualization
+plot_model(n_larvae_zi_nb_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (10) write the model results
+write_rds(n_larvae_zi_nb_quadratic, "./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 5. Total larval mass vs. carcass weight and carcass type ---------------------
