@@ -11,7 +11,7 @@
 ## 3. Plot the relationship between proportion of eggs developed vs. carcass weight and carcass type
 ## 4. Plot the relationship between number of larvae vs. carcass weight and carcass type
 ## 5. Plot the relationship between total larval mass vs. carcass weight and carcass type
-## 6. 
+## 6. Plot the relationship between average larval mass vs. carcass weight and carcass type
 ## 7.
 ##
 ##
@@ -32,7 +32,8 @@ clutch_size_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/clutch_size_zi_
 breeding_success_logistic_quadratic <- read_rds("./03_Outputs/Data_Clean/breeding_success_logistic_quadratic.rds")
 prop_eggs_developed_beta_quadratic <- read_rds("./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic.rds")
 n_larvae_zi_nb_quadratic <- read_rds("./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
-total_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
+total_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/total_larval_mass_gaussian_quadratic.rds")
+average_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/average_larval_mass_gaussian_quadratic.rds")
 
 
 # ggplot theme -----------------------------------------------------------------
@@ -216,32 +217,34 @@ as.ggplot(gtable_total_larval_mass)
 ggsave("./03_Outputs/Figures/Total_Larval_Mass_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-
-
-
-
-
-
-
-
-
-
 # 6. Average larval mass vs. carcass weight and carcass type -------------------
-ggplot(carcass_data_clean, aes(x = carcass_weight, y = average_larval_mass)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "lm", formula = y ~ x, se = F) +
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
-  labs(x = "Carcass weight (g)", y = "Average larval mass (g)", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+p_average_larval_mass <- plot_model(average_larval_mass_gaussian_quadratic, 
+                                    type = "pred", 
+                                    terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = average_larval_mass, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(0, 0.5), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Average larval mass (g)", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
 
+### Remove the legend key borders
+gtable_average_larval_mass <- ggplotGrob(p_average_larval_mass)
+gtable_average_larval_mass$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_average_larval_mass$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_average_larval_mass)
+
 ggsave("./03_Outputs/Figures/Average_Larval_Mass_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+
+
+
 
 
 # 7. Larval density vs. carcass weight and carcass type ------------------------

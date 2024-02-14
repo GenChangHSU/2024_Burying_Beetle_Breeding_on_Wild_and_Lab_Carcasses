@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-10
+## Date: 2024-02-13
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
@@ -11,8 +11,10 @@
 ## 3. Model the relationship between proportion of eggs developed vs. carcass weight and carcass type
 ## 4. Model the relationship between number of larvae vs. carcass weight and carcass type
 ## 5. Model the relationship between total larval mass vs. carcass weight and carcass type
-## 6. 
+## 6. Model the relationship between average larval mass vs. carcass weight and carcass type
 ## 7. 
+## 8. 
+##
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -420,20 +422,6 @@ plot_model(n_larvae_zi_nb_quadratic,
 write_rds(n_larvae_zi_nb_quadratic, "./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # 5. Total larval mass vs. carcass weight and carcass type ---------------------
 ### Plot
 plot_relationship(total_larval_mass)  # a quadratic relationship seems to exist
@@ -498,20 +486,7 @@ plot_model(total_larval_mass_gaussian_quadratic,
            terms = c("carcass_weight [0:100]", "carcass_type"))
 
 # (10) write the model results
-write_rds(total_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic.rds")
-
-
-
-
-
-
-
-
-
-
-
-
-
+write_rds(total_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/total_larval_mass_gaussian_quadratic.rds")
 
 
 # 6. Average larval mass vs. carcass weight and carcass type -------------------
@@ -519,7 +494,7 @@ write_rds(total_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/n_larva
 plot_relationship(average_larval_mass)
 
 ### Model
-# (1) Test the quadratic term
+# (1) Test quadratic term
 average_larval_mass_gaussian_linear <- glmmTMB(average_larval_mass ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                data = carcass_data_clean,
                                                family = "gaussian",
@@ -530,42 +505,64 @@ average_larval_mass_gaussian_quadratic <- glmmTMB(average_larval_mass ~ poly(car
                                                   family = "gaussian",
                                                   na.action = na.omit)
 
-lrtest(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_quadratic)  # quadratic model is not significantly better
-AIC(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_quadratic)  # linear model is not better
+lrtest(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_quadratic)  # quadratic term is significantly better
+AIC(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_quadratic)  # quadratic model is better
 
-# (2) test the interaction term
-average_larval_mass_gaussian_linear_wo_interaction <- glmmTMB(average_larval_mass ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
-                                                              data = carcass_data_clean,
-                                                              family = "gaussian",
-                                                              na.action = na.omit)
+# (2) test interaction term
+average_larval_mass_gaussian_quadratic_wo_interaction <- glmmTMB(average_larval_mass ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+                                                                 data = carcass_data_clean,
+                                                                 family = "gaussian",
+                                                                 na.action = na.omit)
 
-lrtest(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_linear_wo_interaction)  # the interaction term is significant
-AIC(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_linear_wo_interaction)  # the model with the interaction term is better
+lrtest(average_larval_mass_gaussian_quadratic, average_larval_mass_gaussian_quadratic_wo_interaction)  # interaction is not significant
+AIC(average_larval_mass_gaussian_quadratic, average_larval_mass_gaussian_quadratic_wo_interaction)  # model without interaction is slightly better
 
 # (3) model diagnostics
-plot(simulateResiduals(average_larval_mass_gaussian_linear))
-check_model(average_larval_mass_gaussian_linear)  # residual plot looks fine
+plot(simulateResiduals(average_larval_mass_gaussian_quadratic))  # slight residual patterns
+check_model(average_larval_mass_gaussian_quadratic)  # no obvious residual patterns
 
 # (4) model significance
-average_larval_mass_gaussian_linear_null <- glmmTMB(average_larval_mass ~ 1,
-                                                    data = carcass_data_clean,
-                                                    family = "gaussian",
-                                                    na.action = na.omit)
+average_larval_mass_gaussian_quadratic_null <- glmmTMB(average_larval_mass ~ 1,
+                                                       data = carcass_data_clean,
+                                                       family = "gaussian",
+                                                       na.action = na.omit)
 
-lrtest(average_larval_mass_gaussian_linear, average_larval_mass_gaussian_linear_null)
+lrtest(average_larval_mass_gaussian_quadratic, average_larval_mass_gaussian_quadratic_null)  # model is globally significant
 
-# (5) coefficient significance
-summary(average_larval_mass_gaussian_linear)
-tidy(average_larval_mass_gaussian_linear) %>% view
-Anova(average_larval_mass_gaussian_linear, type = 3)
-confint(profile(average_larval_mass_gaussian_linear)) %>% view
+# (5) model summary
+summary(average_larval_mass_gaussian_quadratic)
+# tidy(average_larval_mass_gaussian_quadratic) %>% view
+model_summary(average_larval_mass_gaussian_quadratic, model_name = "Average larval mass", transform_estimate = NULL)
+model_forest_plot(average_larval_mass_gaussian_quadratic, model_name = "Average larval mass", transform_estimate = NULL)
+Anova(average_larval_mass_gaussian_quadratic, type = 2)
+# confint(profile(average_larval_mass_gaussian_quadratic)) %>% view
 
 # (6) emmeans
-emmeans_carcass_type_average_larval_mass <- emmeans(average_larval_mass_gaussian_linear, "carcass_type")
-emmeans_parent_generation_average_larval_mass <- emmeans(average_larval_mass_gaussian_linear, "parent_generation")
+emmeans_carcass_type_average_larval_mass <- emmeans(average_larval_mass_gaussian_quadratic, "carcass_type")
+emmeans_parent_generation_average_larval_mass <- emmeans(average_larval_mass_gaussian_quadratic, "parent_generation")
 
 pairs(regrid(emmeans_carcass_type_average_larval_mass))
 pairs(regrid(emmeans_parent_generation_average_larval_mass))
+
+cld(emmeans_carcass_type_average_larval_mass, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_average_larval_mass, adjust = "Tukey", Letters = letters)
+
+# (9) model visualization
+plot_model(average_larval_mass_gaussian_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (10) write the model results
+write_rds(average_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/average_larval_mass_gaussian_quadratic.rds")
+
+
+
+
+
+
+
+
+
 
 
 # 7. Larval density vs. carcass weight and carcass type ------------------------
