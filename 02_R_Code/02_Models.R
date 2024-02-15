@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-13
+## Date: 2024-02-14
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
@@ -12,9 +12,10 @@
 ## 4. Model the relationship between number of larvae vs. carcass weight and carcass type
 ## 5. Model the relationship between total larval mass vs. carcass weight and carcass type
 ## 6. Model the relationship between average larval mass vs. carcass weight and carcass type
-## 7. 
+## 7. Model the relationship between larval density vs. carcass weight and carcass type
 ## 8. 
-##
+## 9. 
+## 10. 
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -480,12 +481,12 @@ pairs(regrid(emmeans_parent_generation_total_larval_mass))
 cld(emmeans_carcass_type_total_larval_mass, adjust = "Tukey", Letters = letters)
 cld(emmeans_parent_generation_total_larval_mass, adjust = "Tukey", Letters = letters)
 
-# (9) model visualization
+# (7) model visualization
 plot_model(total_larval_mass_gaussian_quadratic, 
            type = "pred", 
            terms = c("carcass_weight [0:100]", "carcass_type"))
 
-# (10) write the model results
+# (8) write the model results
 write_rds(total_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/total_larval_mass_gaussian_quadratic.rds")
 
 
@@ -547,22 +548,13 @@ pairs(regrid(emmeans_parent_generation_average_larval_mass))
 cld(emmeans_carcass_type_average_larval_mass, adjust = "Tukey", Letters = letters)
 cld(emmeans_parent_generation_average_larval_mass, adjust = "Tukey", Letters = letters)
 
-# (9) model visualization
+# (7) model visualization
 plot_model(average_larval_mass_gaussian_quadratic, 
            type = "pred", 
            terms = c("carcass_weight [0:100]", "carcass_type"))
 
-# (10) write the model results
+# (8) write the model results
 write_rds(average_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/average_larval_mass_gaussian_quadratic.rds")
-
-
-
-
-
-
-
-
-
 
 
 # 7. Larval density vs. carcass weight and carcass type ------------------------
@@ -570,7 +562,7 @@ write_rds(average_larval_mass_gaussian_quadratic, "./03_Outputs/Data_Clean/avera
 plot_relationship(larval_density)
 
 ### Model
-# (1) Test the quadratic term
+# (1) Test quadratic term
 larval_density_gaussian_linear <- glmmTMB(larval_density ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                           data = carcass_data_clean,
                                           family = "gaussian",
@@ -581,21 +573,21 @@ larval_density_gaussian_quadratic <- glmmTMB(larval_density ~ poly(carcass_weigh
                                              family = "gaussian",
                                              na.action = na.omit)
 
-lrtest(larval_density_gaussian_linear, larval_density_gaussian_quadratic)  # the quadratic model is not significantly better
-AIC(larval_density_gaussian_linear, larval_density_gaussian_quadratic)  # the linear model is better
+lrtest(larval_density_gaussian_linear, larval_density_gaussian_quadratic)  # quadratic term is not significant
+AIC(larval_density_gaussian_linear, larval_density_gaussian_quadratic)  # linear model is better
 
-# (2) test the interaction term
+# (2) test interaction term
 larval_density_gaussian_linear_wo_interaction <- glmmTMB(larval_density ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                          data = carcass_data_clean,
                                                          family = "gaussian",
                                                          na.action = na.omit)
 
-lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_wo_interaction)  # the interaction term is marginally significant
-AIC(larval_density_gaussian_linear, larval_density_gaussian_linear_wo_interaction)  # the model with interaction term is slightly better
+lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_wo_interaction)  # interaction is not significant
+AIC(larval_density_gaussian_linear, larval_density_gaussian_linear_wo_interaction)  # model without interaction is better
 
 # (3) model diagnostics
-plot(simulateResiduals(larval_density_gaussian_linear))
-check_model(larval_density_gaussian_linear)  # residual plot looks fine
+plot(simulateResiduals(larval_density_gaussian_linear))  # residuals acceptable
+check_model(larval_density_gaussian_linear)  # residuals acceptable
 
 # (4) model significance
 larval_density_gaussian_linear_null <- glmmTMB(larval_density ~ 1,
@@ -603,20 +595,41 @@ larval_density_gaussian_linear_null <- glmmTMB(larval_density ~ 1,
                                                family = "gaussian",
                                                na.action = na.omit)
 
-lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_null)
+lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_null)  # non-comparable because of the difference in sample sizes
 
-# (5) coefficient significance
+# (5) model summary
 summary(larval_density_gaussian_linear)
-tidy(larval_density_gaussian_linear) %>% view
-Anova(larval_density_gaussian_linear, type = 3)
-confint(profile(larval_density_gaussian_linear)) %>% view
+# tidy(larval_density_gaussian_linear) %>% view
+model_summary(larval_density_gaussian_linear, model_name = "Larval density", transform_estimate = NULL)
+model_forest_plot(larval_density_gaussian_linear, model_name = "Larval density", transform_estimate = NULL)
+Anova(larval_density_gaussian_linear, type = 2)
+# confint(profile(larval_density_gaussian_linear)) %>% view
 
-# (7) emmeans
+# (6) emmeans
 emmeans_carcass_type_larval_density <- emmeans(larval_density_gaussian_linear, "carcass_type")
 emmeans_parent_generation_larval_density <- emmeans(larval_density_gaussian_linear, "parent_generation")
 
 pairs(regrid(emmeans_carcass_type_larval_density))
 pairs(regrid(emmeans_parent_generation_larval_density))
+
+cld(emmeans_carcass_type_larval_density, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_larval_density, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(larval_density_gaussian_linear, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (8) write the model results
+write_rds(larval_density_gaussian_linear, "./03_Outputs/Data_Clean/larval_density_gaussian_linear.rds")
+
+
+
+
+
+
+
+
 
 
 # 8. Carcass used vs. carcass weight and carcass type --------------------------
@@ -629,12 +642,12 @@ carcass_data_clean_carcass_weight_loss <- carcass_data_clean %>%
 
 ### Model
 # (1) Test the quadratic term (need to add parent generation to the model later)
-carcass_weight_loss_gaussian_linear <- glmmTMB(carcass_weight_loss ~ carcass_weight * carcass_type + male_size + female_size + (1|generation_pair_id),
+carcass_weight_loss_gaussian_linear <- glmmTMB(carcass_weight_loss ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                data = carcass_data_clean_carcass_weight_loss,
                                                family = "gaussian",
                                                na.action = na.omit)
 
-carcass_weight_loss_gaussian_quadratic <- glmmTMB(carcass_weight_loss ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + (1|generation_pair_id),
+carcass_weight_loss_gaussian_quadratic <- glmmTMB(carcass_weight_loss ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                   data = carcass_data_clean_carcass_weight_loss,
                                                   family = "gaussian",
                                                   na.action = na.omit)
@@ -643,7 +656,7 @@ lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadrat
 AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)  # the linear model is better
 
 # (2) test the interaction term
-carcass_weight_loss_gaussian_linear_wo_interaction <- glmmTMB(carcass_weight_loss ~ carcass_weight + carcass_type + male_size + female_size + (1|generation_pair_id),
+carcass_weight_loss_gaussian_linear_wo_interaction <- glmmTMB(carcass_weight_loss ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                               data = carcass_data_clean_carcass_weight_loss,
                                                               family = "gaussian",
                                                               na.action = na.omit)
