@@ -13,7 +13,7 @@
 ## 5. Model the relationship between total larval mass vs. carcass weight and carcass type
 ## 6. Model the relationship between average larval mass vs. carcass weight and carcass type
 ## 7. Model the relationship between larval density vs. carcass weight and carcass type
-## 8. 
+## 8. Model the relationship between total carcass use vs. carcass weight and carcass type
 ## 9. 
 ## 10. 
 ##
@@ -624,24 +624,23 @@ plot_model(larval_density_gaussian_linear,
 write_rds(larval_density_gaussian_linear, "./03_Outputs/Data_Clean/larval_density_gaussian_linear.rds")
 
 
-
-
-
-
-
-
-
-
-# 8. Carcass used vs. carcass weight and carcass type --------------------------
+# 8. Carcass weight loss vs. carcass weight and carcass type -------------------
 ### Plot
-plot_relationship(carcass_weight_loss)
+plot_relationship(carcass_weight_loss)  # one impossible value and two outliers
 
-### Only include observations with successful breeding events
+### Exclude the impossible value, two outliers, and the observations without any larva
 carcass_data_clean_carcass_weight_loss <- carcass_data_clean %>% 
+  filter(carcass_weight_loss < 25 & carcass_weight_loss > 0) %>% 
   filter(breeding_success == 1)
 
+### Replot the data
+ggplot(carcass_data_clean_carcass_weight_loss, aes(x = carcass_weight, y = carcass_weight_loss, color = carcass_type)) + 
+  geom_point() + 
+  geom_smooth(se = F) + 
+  scale_color_brewer(palette = "Set1")  # a quadratic relationship seems to exist
+
 ### Model
-# (1) Test the quadratic term (need to add parent generation to the model later)
+# (1) test quadratic term
 carcass_weight_loss_gaussian_linear <- glmmTMB(carcass_weight_loss ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                data = carcass_data_clean_carcass_weight_loss,
                                                family = "gaussian",
@@ -652,35 +651,37 @@ carcass_weight_loss_gaussian_quadratic <- glmmTMB(carcass_weight_loss ~ poly(car
                                                   family = "gaussian",
                                                   na.action = na.omit)
 
-lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)  # the quadratic model is not significantly better
-AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)  # the linear model is better
+lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)  # quadratic term is significant
+AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_quadratic)  # quadratic model is slightly better
 
-# (2) test the interaction term
-carcass_weight_loss_gaussian_linear_wo_interaction <- glmmTMB(carcass_weight_loss ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+# (2) test interaction term
+carcass_weight_loss_gaussian_quadratic_wo_interaction <- glmmTMB(carcass_weight_loss ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                               data = carcass_data_clean_carcass_weight_loss,
                                                               family = "gaussian",
                                                               na.action = na.omit)
 
-lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the interaction term is not significant
-AIC(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_wo_interaction)  # the model without interaction term is better
+lrtest(carcass_weight_loss_gaussian_quadratic, carcass_weight_loss_gaussian_quadratic_wo_interaction)  # interaction term is not significant
+AIC(carcass_weight_loss_gaussian_quadratic, carcass_weight_loss_gaussian_quadratic_wo_interaction)  # model without interaction is slightly better
 
 # (3) model diagnostics
-plot(simulateResiduals(carcass_weight_loss_gaussian_linear))
-check_model(carcass_weight_loss_gaussian_linear)  # residual plot looks acceptable (expect for one outlier)
+plot(simulateResiduals(carcass_weight_loss_gaussian_quadratic))  # residuals acceptable
+check_model(carcass_weight_loss_gaussian_quadratic)  # residuals acceptable
 
 # (4) model significance
-carcass_weight_loss_gaussian_linear_null <- glmmTMB(carcass_weight_loss ~ 1,
+carcass_weight_loss_gaussian_quadratic_null <- glmmTMB(carcass_weight_loss ~ 1,
                                                     data = carcass_data_clean_carcass_weight_loss,
                                                     family = "gaussian",
                                                     na.action = na.omit)
 
-lrtest(carcass_weight_loss_gaussian_linear, carcass_weight_loss_gaussian_linear_null)  # the model is globally significant
+lrtest(carcass_weight_loss_gaussian_quadratic, carcass_weight_loss_gaussian_quadratic_null)  # model is globally significant
 
-# (5) coefficient significance
-summary(carcass_weight_loss_gaussian_linear)
-tidy(carcass_weight_loss_gaussian_linear) %>% view
-Anova(carcass_weight_loss_gaussian_linear, type = 2)
-confint(profile(carcass_weight_loss_gaussian_linear)) %>% view
+# (5) model summary
+summary(carcass_weight_loss_gaussian_quadratic)
+# tidy(carcass_weight_loss_gaussian_quadratic) %>% view
+model_summary(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
+model_forest_plot(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
+Anova(carcass_weight_loss_gaussian_quadratic, type = 3)
+# confint(profile(carcass_weight_loss_gaussian_quadratic)) %>% view
 
 # (6) emmeans
 emmeans_carcass_type_carcass_weight_loss <- emmeans(carcass_weight_loss_gaussian_linear, "carcass_type")
@@ -688,6 +689,24 @@ emmeans_parent_generation_carcass_weight_loss <- emmeans(carcass_weight_loss_gau
 
 pairs(regrid(emmeans_carcass_type_carcass_weight_loss))
 pairs(regrid(emmeans_parent_generation_carcass_weight_loss))
+
+cld(emmeans_carcass_type_carcass_weight_loss, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_carcass_weight_loss, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(carcass_weight_loss_gaussian_quadratic, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (8) write the model results
+write_rds(carcass_weight_loss_gaussian_quadratic, "./03_Outputs/Data_Clean/carcass_weight_loss_gaussian_quadratic.rds")
+
+
+
+
+
+
+
 
 
 # 9. Carcass use efficiency vs. carcass weight and carcass type ----------------
