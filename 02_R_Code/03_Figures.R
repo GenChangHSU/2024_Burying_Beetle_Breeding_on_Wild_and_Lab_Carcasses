@@ -14,8 +14,8 @@
 ## 6. Plot the relationship between average larval mass vs. carcass weight and carcass type
 ## 7. Plot the relationship between larval density vs. carcass weight and carcass type
 ## 8. Plot the relationship between carcass weight loss vs. carcass weight and carcass type
-## 9. 
-## 10. 
+## 9. Plot the relationship between proportion of carcass used vs. carcass weight and carcass type
+## 10. Plot the relationship between average larval mass vs. larval density by carcass type
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -38,6 +38,7 @@ total_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/total_
 average_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/average_larval_mass_gaussian_quadratic.rds")
 larval_density_gaussian_linear <- read_rds("./03_Outputs/Data_Clean/larval_density_gaussian_linear.rds")
 carcass_weight_loss_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/carcass_weight_loss_gaussian_quadratic.rds")
+prop_carcass_used_beta_linear <- read_rds("./03_Outputs/Data_Clean/prop_carcass_used_beta_linear.rds")
 
 
 # ggplot theme -----------------------------------------------------------------
@@ -248,13 +249,13 @@ ggsave("./03_Outputs/Figures/Average_Larval_Mass_Carcass_Weight.tiff", width = 5
 
 # 7. Larval density vs. carcass weight and carcass type ------------------------
 p_larval_density <- plot_model(larval_density_gaussian_linear, 
-                                    type = "pred", 
-                                    terms = c("carcass_weight [0:100]", "carcass_type")) +
+                               type = "pred", 
+                               terms = c("carcass_weight [0:100]", "carcass_type")) +
   geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = larval_density, color = carcass_type), inherit.aes = F) + 
   scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.03, 2.3), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.03, 3.2), expand = c(0, 0)) + 
   labs(title = NULL, x = "Carcass weight (g)", y = "Larval density \n (number per gram carcass)", color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
@@ -280,7 +281,7 @@ carcass_data_clean_carcass_weight_loss <- carcass_data_clean %>%
 p_carcass_weight_loss <- plot_model(carcass_weight_loss_gaussian_quadratic, 
                                type = "pred", 
                                terms = c("carcass_weight [0:100]", "carcass_type")) +
-  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = carcass_weight_loss, color = carcass_type), inherit.aes = F) + 
+  geom_point(data = carcass_data_clean_carcass_weight_loss, aes(x = carcass_weight, y = carcass_weight_loss, color = carcass_type), inherit.aes = F) + 
   scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
@@ -301,48 +302,60 @@ as.ggplot(gtable_carcass_weight_loss)
 ggsave("./03_Outputs/Figures/Carcass_Weight_Loss_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
+# 9. Proportion of carcass used vs. carcass weight and carcass type ------------
+### Remove the impossible values and two outliers
+carcass_data_clean_prop_carcass_used <- carcass_data_clean %>% 
+  filter(prop_carcass_used < 0.7 & prop_carcass_used > 0)
 
-
-
-
-
-
-# 9. Carcass use efficiency vs. carcass weight and carcass type ----------------
-### Remove the outliers
-carcass_data_clean_efficiency <- carcass_data_clean %>% 
-  filter(efficiency < 0.5)
-
-ggplot(carcass_data_clean_efficiency, aes(x = carcass_weight, y = efficiency)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "gam", formula = y ~ x, method.args = list(family = betar(link = "logit")), se = F) +
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 128), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
-  labs(x = "Carcass weight (g)", y = "Carcass use efficiency", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red", linetype = "solid"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+p_prop_carcass_used <- plot_model(prop_carcass_used_beta_linear, 
+                                  type = "pred", 
+                                  terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean_prop_carcass_used, aes(x = carcass_weight, y = prop_carcass_used, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.05, 0.61), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of carcass used", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
 
-ggsave("./03_Outputs/Figures/Efficiency_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+### Remove the legend key borders
+gtable_prop_carcass_used <- ggplotGrob(p_prop_carcass_used)
+gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_prop_carcass_used)
+
+ggsave("./03_Outputs/Figures/Proportion_of_Carcass_Used.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
+
+
+
+
 
 
 # 10. Average larval mass vs. larval density -----------------------------------
-ggplot(carcass_data_clean, aes(x = larval_density, y = average_larval_mass)) + 
-  geom_point(aes(color = carcass_type)) + 
-  geom_smooth(aes(group = carcass_type), color = NA, method = "lm", formula = y ~ x, se = T, show.legend = F) +
-  geom_smooth(aes(color = carcass_type), method = "lm", formula = y ~ x, se = F) +
-  scale_color_brewer(palette = "Set1", label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(0, 2.2), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.01, 0.5), expand = c(0, 0)) + 
-  labs(x = "Larval density \n (No. of larvae/gram carcass)", y = "Average larval mass (g)", color = NULL) +
-  guides(color = guide_legend(byrow = T, override.aes = list(size = 2, fill = "red"))) + 
-  my_theme + 
-  theme(legend.position = c(0.85, 0.85),
+p_prop_carcass_used <- plot_model(prop_carcass_used_beta_linear, 
+                                  type = "pred", 
+                                  terms = c("carcass_weight [0:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = prop_carcass_used, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-0.05, 0.61), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of carcass used", color = NULL) +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
         legend.background = element_blank(),
         legend.key.width = unit(0.3, "in"))
+
+### Remove the legend key borders
+gtable_prop_carcass_used <- ggplotGrob(p_prop_carcass_used)
+gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_prop_carcass_used)
 
 ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 

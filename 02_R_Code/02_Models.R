@@ -14,8 +14,8 @@
 ## 6. Model the relationship between average larval mass vs. carcass weight and carcass type
 ## 7. Model the relationship between larval density vs. carcass weight and carcass type
 ## 8. Model the relationship between total carcass use vs. carcass weight and carcass type
-## 9. 
-## 10. 
+## 9. Model the relationship between proportion of carcass used vs. carcass weight and carcass type
+## 10. Model the relationship between average larval mass vs. larval density and carcass type
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -680,7 +680,7 @@ summary(carcass_weight_loss_gaussian_quadratic)
 # tidy(carcass_weight_loss_gaussian_quadratic) %>% view
 model_summary(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
 model_forest_plot(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
-Anova(carcass_weight_loss_gaussian_quadratic, type = 3)
+Anova(carcass_weight_loss_gaussian_quadratic, type = 2)
 # confint(profile(carcass_weight_loss_gaussian_quadratic)) %>% view
 
 # (6) emmeans
@@ -702,69 +702,92 @@ plot_model(carcass_weight_loss_gaussian_quadratic,
 write_rds(carcass_weight_loss_gaussian_quadratic, "./03_Outputs/Data_Clean/carcass_weight_loss_gaussian_quadratic.rds")
 
 
-
-
-
-
-
-
-
-# 9. Carcass use efficiency vs. carcass weight and carcass type ----------------
+# 9. Proportion of carcass used vs. carcass weight and carcass type ------------
 ### Plot
-plot_relationship(efficiency)  # there seem to be two outliers
+plot_relationship(prop_carcass_used)  # one impossible value and two outliers
 
-### Remove the outliers
-carcass_data_clean_efficiency <- carcass_data_clean %>% 
-  filter(efficiency < 0.5)
+### Remove the impossible values and two outliers
+carcass_data_clean_prop_carcass_used <- carcass_data_clean %>% 
+  filter(prop_carcass_used < 0.7 & prop_carcass_used > 0)
+
+### Replot the data
+ggplot(carcass_data_clean_prop_carcass_used, aes(x = carcass_weight, y = prop_carcass_used, color = carcass_type)) + 
+  geom_point() + 
+  geom_smooth(se = F) + 
+  scale_color_brewer(palette = "Set1") 
 
 ### Model
-# (1) Test the quadratic term (need to add parent generation to the model later)
-efficiency_beta_linear <- glmmTMB(efficiency ~ carcass_weight * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                  data = carcass_data_clean_efficiency,
+# (1) test quadratic term
+prop_carcass_used_beta_linear <- glmmTMB(prop_carcass_used ~ carcass_weight * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+                                  data = carcass_data_clean_prop_carcass_used,
                                   family = beta_family("logit"),
                                   na.action = na.omit)
 
-efficiency_beta_quadratic <- glmmTMB(efficiency ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + (1|generation_pair_id),
-                                     data = carcass_data_clean_efficiency,
+prop_carcass_used_beta_quadratic <- glmmTMB(prop_carcass_used ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+                                     data = carcass_data_clean_prop_carcass_used,
                                      family = beta_family("logit"),
                                      na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_quadratic)  # quadratic model is not significantly better
-AIC(efficiency_beta_linear, efficiency_beta_quadratic)  # linear model is better
+lrtest(prop_carcass_used_beta_linear, prop_carcass_used_beta_quadratic)  # quadratic term not significant
+AIC(prop_carcass_used_beta_linear, prop_carcass_used_beta_quadratic)  # linear model is slightly better
 
-# (2) test the interaction term
-efficiency_beta_linear_wo_interaction <- glmmTMB(efficiency ~ carcass_weight + carcass_type + male_size + female_size + (1|generation_pair_id),
-                                                 data = carcass_data_clean_efficiency,
+# (2) test interaction term
+prop_carcass_used_beta_linear_wo_interaction <- glmmTMB(prop_carcass_used ~ carcass_weight + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+                                                 data = carcass_data_clean_prop_carcass_used,
                                                  family = beta_family("logit"),
                                                  na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)  # interaction term is not significant
-AIC(efficiency_beta_linear, efficiency_beta_linear_wo_interaction)  # model without the interaction term is better
+lrtest(prop_carcass_used_beta_linear, prop_carcass_used_beta_linear_wo_interaction)  # interaction is not significant
+AIC(prop_carcass_used_beta_linear, prop_carcass_used_beta_linear_wo_interaction)  # model without interaction is better
 
 # (3) model diagnostics
-plot(simulateResiduals(efficiency_beta_linear))
-check_model(efficiency_beta_linear)  # residual plot looks acceptable
+plot(simulateResiduals(prop_carcass_used_beta_linear))  # no obvious residual patterns
+check_model(prop_carcass_used_beta_linear)
 
 # (4) model significance
-efficiency_beta_linear_null <- glmmTMB(efficiency ~ 1,
-                                       data = carcass_data_clean_efficiency,
+prop_carcass_used_beta_linear_null <- glmmTMB(prop_carcass_used ~ 1,
+                                       data = carcass_data_clean_prop_carcass_used,
                                        family = beta_family("logit"),
                                        na.action = na.omit)
 
-lrtest(efficiency_beta_linear, efficiency_beta_linear_null)  # the model is globally significant
+lrtest(prop_carcass_used_beta_linear, prop_carcass_used_beta_linear_null)  # model is globally significant
 
-# (5) coefficient significance
-summary(efficiency_beta_linear)
-tidy(efficiency_beta_linear) %>% view
-Anova(efficiency_beta_linear, type = 2)
-confint(profile(efficiency_beta_linear)) %>% view
+# (5) model summary
+summary(prop_carcass_used_beta_linear)
+# tidy(prop_carcass_used_beta_linear) %>% view
+model_summary(prop_carcass_used_beta_linear, model_name = "Proportion of carcass used", transform_estimate = "exp")
+model_forest_plot(prop_carcass_used_beta_linear, model_name = "Proportion of carcass used", transform_estimate = "exp")
+Anova(prop_carcass_used_beta_linear, type = 2)
+# confint(profile(prop_carcass_used_beta_linear)) %>% view
 
 # (6) emmeans
-emmeans_carcass_type_efficiency <- emmeans(efficiency_beta_linear, "carcass_type")
-emmeans_parent_generation_efficiency <- emmeans(efficiency_beta_linear, "parent_generation")
+emmeans_carcass_type_prop_carcass_used <- emmeans(prop_carcass_used_beta_linear, "carcass_type")
+emmeans_parent_generation_prop_carcass_used <- emmeans(prop_carcass_used_beta_linear, "parent_generation")
 
-pairs(regrid(emmeans_carcass_type_efficiency))
-pairs(regrid(emmeans_parent_generation_efficiency))
+pairs(regrid(emmeans_carcass_type_prop_carcass_used))
+pairs(regrid(emmeans_parent_generation_prop_carcass_used))
+
+cld(emmeans_carcass_type_prop_carcass_used, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_prop_carcass_used, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(prop_carcass_used_beta_linear, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_type"))
+
+# (8) write the model results
+write_rds(prop_carcass_used_beta_linear, "./03_Outputs/Data_Clean/prop_carcass_used_beta_linear.rds")
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 10. Average larval mass vs. larval density -----------------------------------
