@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-14
+## Date: 2024-02-17
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
@@ -221,7 +221,7 @@ breeding_success_logistic_quadratic_null <- glmmTMB(breeding_success ~ 1,
                                                     family = "binomial",
                                                     na.action = na.omit)
 
-lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_null)  # non-comparable because of the difference in sample sizes
+# lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_null)  # non-comparable because of the difference in sample sizes
 
 # (5) model summary
 summary(breeding_success_logistic_quadratic)
@@ -394,7 +394,7 @@ n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
                                          family = "nbinom2",
                                          na.action = na.omit)
 
-lrtest(n_larvae_zi_nb_quadratic_null, n_larvae_zi_nb_quadratic)  # non-comparable because of the difference in sample sizes
+# lrtest(n_larvae_zi_nb_quadratic_null, n_larvae_zi_nb_quadratic)  # non-comparable because of the difference in sample sizes
 
 # (7) model summary
 summary(n_larvae_zi_nb_quadratic)
@@ -595,7 +595,7 @@ larval_density_gaussian_linear_null <- glmmTMB(larval_density ~ 1,
                                                family = "gaussian",
                                                na.action = na.omit)
 
-lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_null)  # non-comparable because of the difference in sample sizes
+# lrtest(larval_density_gaussian_linear, larval_density_gaussian_linear_null)  # non-comparable because of the difference in sample sizes
 
 # (5) model summary
 summary(larval_density_gaussian_linear)
@@ -779,42 +779,31 @@ plot_model(prop_carcass_used_beta_linear,
 write_rds(prop_carcass_used_beta_linear, "./03_Outputs/Data_Clean/prop_carcass_used_beta_linear.rds")
 
 
-
-
-
-
-
-
-
-
-
-
-
 # 10. Average larval mass vs. larval density -----------------------------------
 ### Plot
-ggplot(carcass_data_clean, aes(x = average_larval_mass, y = larval_density, color = carcass_type)) + 
+ggplot(carcass_data_clean, aes(x = larval_density, y = average_larval_mass, color = carcass_type)) + 
   geom_point() + 
   geom_smooth(se = F) + 
-  scale_color_brewer(palette = "Set1")
+  scale_color_brewer(palette = "Set1")  # a linear relationship
 
 ### Model
-# (1) test the interaction term
-average_larval_mass_larval_density_gaussian_linear <- glmmTMB(average_larval_mass ~ larval_density * carcass_type + male_size + female_size + (1|generation_pair_id),
+# (1) test interaction term
+average_larval_mass_larval_density_gaussian_linear <- glmmTMB(average_larval_mass ~ larval_density * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                data = carcass_data_clean,
                                                family = "gaussian",
                                                na.action = na.omit)
 
-average_larval_mass_larval_density_gaussian_linear_wo_interaction <- glmmTMB(average_larval_mass ~ larval_density + carcass_type + male_size + female_size + (1|generation_pair_id),
+average_larval_mass_larval_density_gaussian_linear_wo_interaction <- glmmTMB(average_larval_mass ~ larval_density + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
                                                               data = carcass_data_clean,
                                                               family = "gaussian",
                                                               na.action = na.omit)
 
-lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # interaction term is not significant
-AIC(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # model without interaction term is slightly better
+lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # interaction is not significant
+AIC(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_wo_interaction)  # model without interaction is slightly better
 
 # (2) model diagnostics
-plot(simulateResiduals(average_larval_mass_larval_density_gaussian_linear))
-check_model(average_larval_mass_larval_density_gaussian_linear)  # residual plot looks fine
+plot(simulateResiduals(average_larval_mass_larval_density_gaussian_linear))  # no obvious residual patterns
+check_model(average_larval_mass_larval_density_gaussian_linear)  # no obvious residual patterns
 
 # (3) model significance
 average_larval_mass_larval_density_gaussian_linear_null <- glmmTMB(average_larval_mass ~ 1,
@@ -822,13 +811,15 @@ average_larval_mass_larval_density_gaussian_linear_null <- glmmTMB(average_larva
                                                     family = "gaussian",
                                                     na.action = na.omit)
 
-lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_null)
+lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_larval_density_gaussian_linear_null)  # model is globally significant
 
-# (4) coefficient significance
+# (4) model summary
 summary(average_larval_mass_larval_density_gaussian_linear)
-tidy(average_larval_mass_larval_density_gaussian_linear) %>% view
-Anova(average_larval_mass_larval_density_gaussian_linear, type = 3)
-confint(profile(average_larval_mass_larval_density_gaussian_linear)) %>% view
+# tidy(average_larval_mass_larval_density_gaussian_linear) %>% view
+model_summary(average_larval_mass_larval_density_gaussian_linear, model_name = "Average larval mass vs. Larval density", transform_estimate = NULL)
+model_forest_plot(average_larval_mass_larval_density_gaussian_linear, model_name = "Average larval mass vs. Larval density", transform_estimate = NULL)
+Anova(average_larval_mass_larval_density_gaussian_linear, type = 2)
+# confint(profile(average_larval_mass_larval_density_gaussian_linear)) %>% view
 
 # (5) emmeans
 emmeans_carcass_type_average_larval_mass_larval_density <- emmeans(average_larval_mass_larval_density_gaussian_linear, "carcass_type")
@@ -837,6 +828,16 @@ emmeans_parent_generation_average_larval_mass_larval_density <- emmeans(average_
 pairs(regrid(emmeans_carcass_type_average_larval_mass_larval_density))
 pairs(regrid(emmeans_parent_generation_average_larval_mass_larval_density))
 
+cld(emmeans_carcass_type_average_larval_mass_larval_density, adjust = "Tukey", Letters = letters)
+cld(emmeans_parent_generation_average_larval_mass_larval_density, adjust = "Tukey", Letters = letters)
+
+# (6) model visualization
+plot_model(average_larval_mass_larval_density_gaussian_linear, 
+           type = "pred", 
+           terms = c("larval_density [0:2]", "carcass_type"))
+
+# (7) write the model results
+write_rds(average_larval_mass_larval_density_gaussian_linear, "./03_Outputs/Data_Clean/average_larval_mass_larval_density_gaussian_linear.rds")
 
 
 

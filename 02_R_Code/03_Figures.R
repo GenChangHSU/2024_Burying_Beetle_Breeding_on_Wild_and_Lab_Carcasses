@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-14
+## Date: 2024-02-17
 ##
 ## Description:
 ## 1. Plot the relationship between clutch size vs. carcass weight and carcass type
@@ -39,6 +39,7 @@ average_larval_mass_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/aver
 larval_density_gaussian_linear <- read_rds("./03_Outputs/Data_Clean/larval_density_gaussian_linear.rds")
 carcass_weight_loss_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/carcass_weight_loss_gaussian_quadratic.rds")
 prop_carcass_used_beta_linear <- read_rds("./03_Outputs/Data_Clean/prop_carcass_used_beta_linear.rds")
+average_larval_mass_larval_density_gaussian_linear <- read_rds("./03_Outputs/Data_Clean/average_larval_mass_larval_density_gaussian_linear.rds")
 
 
 # ggplot theme -----------------------------------------------------------------
@@ -85,6 +86,10 @@ my_ggtheme <-
 
         
 ############################### Code starts here ###############################
+
+### Convert the variable "parent_generation" to a factor
+carcass_data_clean <- carcass_data_clean %>% 
+  mutate(parent_generation = as.factor(parent_generation))
 
 ### Exclude wild carcasses larger than 100 grams
 carcass_data_clean <- carcass_data_clean %>% 
@@ -331,20 +336,16 @@ as.ggplot(gtable_prop_carcass_used)
 ggsave("./03_Outputs/Figures/Proportion_of_Carcass_Used.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-
-
-
-
 # 10. Average larval mass vs. larval density -----------------------------------
-p_prop_carcass_used <- plot_model(prop_carcass_used_beta_linear, 
+p_average_larval_mass_larval_density <- plot_model(average_larval_mass_larval_density_gaussian_linear, 
                                   type = "pred", 
-                                  terms = c("carcass_weight [0:100]", "carcass_type")) +
-  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = prop_carcass_used, color = carcass_type), inherit.aes = F) + 
+                                  terms = c("larval_density [0:2]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = larval_density, y = average_larval_mass, color = carcass_type), inherit.aes = F) + 
   scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
-  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(-0.05, 0.61), expand = c(0, 0)) + 
-  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of carcass used", color = NULL) +
+  scale_x_continuous(limits = c(-0.05, 3.15), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(0, 0.45), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Larval density", y = "Average larval mass", color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
   theme(legend.position = c(0.85, 0.87),
@@ -352,10 +353,10 @@ p_prop_carcass_used <- plot_model(prop_carcass_used_beta_linear,
         legend.key.width = unit(0.3, "in"))
 
 ### Remove the legend key borders
-gtable_prop_carcass_used <- ggplotGrob(p_prop_carcass_used)
-gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
-gtable_prop_carcass_used$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
-as.ggplot(gtable_prop_carcass_used)
+gtable_average_larval_mass_larval_density <- ggplotGrob(p_average_larval_mass_larval_density)
+gtable_average_larval_mass_larval_density$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_average_larval_mass_larval_density$grobs[[15]]$grobs$`99_3f99c453c8478605472e33507cf97de4`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_average_larval_mass_larval_density)
 
 ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
