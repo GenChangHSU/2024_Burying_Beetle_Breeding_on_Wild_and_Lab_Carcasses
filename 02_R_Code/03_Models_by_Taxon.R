@@ -19,6 +19,13 @@ library(tidyverse)
 library(car)
 library(emmeans)
 library(multcomp)
+library(glmmTMB)
+library(DHARMa)
+library(performance)
+library(lmtest)
+library(sjPlot)
+library(broom)
+library(broom.mixed)
 
 
 # Import files -----------------------------------------------------------------
@@ -64,6 +71,23 @@ plot_relationship_taxon <- function(yvar){
     scale_color_brewer(palette = "Set1")
 }
 
+# 1. Clutch size vs. carcass weight and carcass taxon --------------------------
+### Plot
+plot_relationship_taxon(clutch_size)  # a quadratic relationship seems to exist
+
+### Model
+# (1) test quadratic term
+clutch_size_poisson_linear_taxon <- glmmTMB(clutch_size ~ carcass_weight * carcass_taxon + male_size + female_size + parent_generation,
+                                      data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                      family = "poisson",
+                                      na.action = na.omit)
+
+clutch_size_poisson_quadratic_taxon <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                         data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                         family = "poisson",
+                                         na.action = na.omit)
+
+lrtest(clutch_size_poisson_linear_taxon, clutch_size_poisson_quadratic_taxon)
 
 
 
