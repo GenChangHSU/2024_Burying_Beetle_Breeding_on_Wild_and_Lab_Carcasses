@@ -1,6 +1,6 @@
 ## -----------------------------------------------------------------------------
 ## Title: Analysis of the relationships between carcass attributes and beetle breeding outcomes 
-##        in different taxonic groups 
+##        in different taxonomic groups 
 ##
 ## Author: Gen-Chang Hsu
 ##
@@ -17,8 +17,6 @@ set.seed(123)
 # Libraries --------------------------------------------------------------------
 library(tidyverse)
 library(car)
-library(emmeans)
-library(multcomp)
 library(glmmTMB)
 library(DHARMa)
 library(performance)
@@ -26,6 +24,8 @@ library(lmtest)
 library(sjPlot)
 library(broom)
 library(broom.mixed)
+library(emmeans)
+library(multcomp)
 
 
 # Import files -----------------------------------------------------------------
@@ -71,23 +71,93 @@ plot_relationship_taxon <- function(yvar){
     scale_color_brewer(palette = "Set1")
 }
 
-# 1. Clutch size vs. carcass weight and carcass taxon --------------------------
+# 2. Clutch size vs. carcass weight and carcass taxon --------------------------
 ### Plot
 plot_relationship_taxon(clutch_size)  # a quadratic relationship seems to exist
 
-### Model
+### Model (without reptiles)
 # (1) test quadratic term
 clutch_size_poisson_linear_taxon <- glmmTMB(clutch_size ~ carcass_weight * carcass_taxon + male_size + female_size + parent_generation,
-                                      data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
-                                      family = "poisson",
-                                      na.action = na.omit)
+                                            data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                            family = "poisson",
+                                            na.action = na.omit)
 
 clutch_size_poisson_quadratic_taxon <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
-                                         data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
-                                         family = "poisson",
-                                         na.action = na.omit)
+                                               data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                               family = "poisson",
+                                               na.action = na.omit)
 
-lrtest(clutch_size_poisson_linear_taxon, clutch_size_poisson_quadratic_taxon)
+lrtest(clutch_size_poisson_linear_taxon, clutch_size_poisson_quadratic_taxon)  # quadratic term is significant
+AIC(clutch_size_poisson_linear_taxon, clutch_size_poisson_quadratic_taxon)  # quadratic model is better
+
+# (2) test overdispersion
+clutch_size_nb_quadratic_taxon <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                          data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                          family = "nbinom2",
+                                          na.action = na.omit)
+
+lrtest(clutch_size_poisson_quadratic_taxon, clutch_size_nb_quadratic_taxon)  # overdispersion is significant
+AIC(clutch_size_poisson_quadratic_taxon, clutch_size_nb_quadratic_taxon)  # negative binomial model is better
+
+# (3) test zero inflation
+clutch_size_zi_nb_quadratic_taxon <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                             data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                             ziformula = ~ 1,
+                                             family = "nbinom2",
+                                             na.action = na.omit)
+
+testZeroInflation(clutch_size_nb_quadratic_taxon)
+lrtest(clutch_size_nb_quadratic_taxon, clutch_size_zi_nb_quadratic_taxon)  # zero inflation is significant
+AIC(clutch_size_nb_quadratic_taxon, clutch_size_zi_nb_quadratic_taxon)  # zero-inflated model is significant
+
+# (4) test interaction term
+clutch_size_zi_nb_quadratic_wo_interaction_taxon <- glmmTMB(clutch_size ~ poly(carcass_weight, 2) + carcass_taxon + male_size + female_size + parent_generation,
+                                                            data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                                            ziformula = ~ 1,
+                                                            family = "nbinom2",
+                                                            na.action = na.omit)
+
+lrtest(clutch_size_zi_nb_quadratic_taxon, clutch_size_zi_nb_quadratic_wo_interaction_taxon)  # interaction is not significant
+AIC(clutch_size_zi_nb_quadratic_taxon, clutch_size_zi_nb_quadratic_wo_interaction_taxon)  # model without interaction is better
+
+# (5) model diagnostics
+plot(simulateResiduals(clutch_size_zi_nb_quadratic_taxon))  # some patterns of heteroscedasticity
+check_model(clutch_size_zi_nb_quadratic_taxon)  # some patterns of heteroscedasticity
+
+# (6) model significance
+clutch_size_zi_nb_quadratic_null_taxon <- glmmTMB(clutch_size ~ 1,
+                                                  data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                                  ziformula = ~ 1,
+                                                  family = "nbinom2",
+                                                  na.action = na.omit)
+
+lrtest(clutch_size_zi_nb_quadratic_null_taxon, clutch_size_zi_nb_quadratic_taxon)  # model is globally significant
+
+# (7) model summary
+summary(clutch_size_zi_nb_quadratic_taxon)
+# tidy(clutch_size_zi_nb_quadratic_taxon) %>% view
+model_summary(clutch_size_zi_nb_quadratic_taxon, model_name = "Clutch size", transform_estimate = "exp")
+model_forest_plot(clutch_size_zi_nb_quadratic_taxon, model_name = "Clutch size", transform_estimate = "exp")
+Anova(clutch_size_zi_nb_quadratic_taxon, type = 2)
+# confint(profile(clutch_size_zi_nb_quadratic_taxon)) %>% view
+
+# # (8) emmeans
+# emmeans_carcass_type_clutch_size_taxon <- emmeans(clutch_size_zi_nb_quadratic_taxon, "carcass_taxon", type = "response")
+# emmeans_parent_generation_clutch_size_taxon <- emmeans(clutch_size_zi_nb_quadratic_taxon, "parent_generation", type = "response")
+# 
+# pairs(regrid(emmeans_carcass_type_clutch_size_taxon))
+# pairs(regrid(emmeans_parent_generation_clutch_size_taxon))
+# 
+# cld(emmeans_carcass_type_clutch_size_taxon, adjust = "Tukey", Letters = letters)
+# cld(emmeans_parent_generation_clutch_size_taxon, adjust = "Tukey", Letters = letters)
+
+# (9) model visualization
+plot_model(clutch_size_zi_nb_quadratic_taxon, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_taxon"))
+
+# (10) write the model results
+write_rds(clutch_size_zi_nb_quadratic_taxon, "./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic_taxon.rds")
 
 
 
