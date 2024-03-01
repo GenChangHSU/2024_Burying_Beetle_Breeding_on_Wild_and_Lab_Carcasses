@@ -160,6 +160,74 @@ plot_model(clutch_size_zi_nb_quadratic_taxon,
 write_rds(clutch_size_zi_nb_quadratic_taxon, "./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic_taxon.rds")
 
 
+# 3. Breeding success vs. carcass weight and carcass type ----------------------
+### Plot
+plot_relationship_taxon(breeding_success)  # a quadratic relationship seems to exist
+
+### Model (without reptiles)
+# (1) Test quadratic term
+breeding_success_logistic_linear_taxon <- glmmTMB(breeding_success ~ carcass_weight * carcass_taxon + male_size + female_size + parent_generation,
+                                            data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                            family = "binomial",
+                                            na.action = na.omit)
+
+breeding_success_logistic_quadratic_taxon <- glmmTMB(breeding_success ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                               data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                               family = "binomial",
+                                               na.action = na.omit)
+
+lrtest(breeding_success_logistic_linear_taxon, breeding_success_logistic_quadratic_taxon)  # quadratic term is significant
+AIC(breeding_success_logistic_linear_taxon, breeding_success_logistic_quadratic_taxon)  # quadratic model is better
+
+# (2) test interaction term
+breeding_success_logistic_quadratic_wo_interaction_taxon <- glmmTMB(breeding_success ~ poly(carcass_weight, 2) + carcass_taxon + male_size + female_size + parent_generation,
+                                                              data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                                              family = "binomial",
+                                                              na.action = na.omit)
+
+lrtest(breeding_success_logistic_quadratic_taxon, breeding_success_logistic_quadratic_wo_interaction_taxon)  # interaction is not significant
+AIC(breeding_success_logistic_quadratic_taxon, breeding_success_logistic_quadratic_wo_interaction_taxon)  #  model with interaction is not better
+
+# (3) model diagnostics
+plot(simulateResiduals(breeding_success_logistic_quadratic_taxon))  # no obvious residual patterns
+check_model(breeding_success_logistic_quadratic_taxon)  # residual patterns acceptable
+
+# (4) model significance
+breeding_success_logistic_quadratic_null_taxon <- glmmTMB(breeding_success ~ 1,
+                                                    data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                                    family = "binomial",
+                                                    na.action = na.omit)
+
+# lrtest(breeding_success_logistic_quadratic_taxon, breeding_success_logistic_quadratic_null_taxon)  # non-comparable because of the difference in sample sizes
+
+# (5) model summary
+summary(breeding_success_logistic_quadratic_taxon)
+# tidy(breeding_success_logistic_quadratic_taxon) %>% view
+model_summary(breeding_success_logistic_quadratic_taxon, model_name = "Breeding success", transform_estimate = "exp")
+model_forest_plot(breeding_success_logistic_quadratic_taxon, model_name = "Breeding success", transform_estimate = "exp")
+Anova(breeding_success_logistic_quadratic_taxon, type = 2)
+# confint(profile(breeding_success_logistic_quadratic_taxon)) %>% view
+
+# (6) emmeans
+# emmeans_carcass_type_breeding_success_taxon <- emmeans(breeding_success_logistic_quadratic_taxon, "carcass_taxon", type = "response")
+# emmeans_parent_generation_breeding_success_taxon <- emmeans(breeding_success_logistic_quadratic_taxon, "parent_generation", type = "response")
+# 
+# pairs(regrid(emmeans_carcass_type_breeding_success_taxon))
+# pairs(regrid(emmeans_parent_generation_breeding_success_taxon))
+# 
+# cld(emmeans_carcass_type_breeding_success_taxon, adjust = "Tukey", Letters = letters)
+# cld(emmeans_parent_generation_breeding_success_taxon, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(breeding_success_logistic_quadratic_taxon, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_taxon"))
+
+# (8) write the model results
+write_rds(breeding_success_logistic_quadratic_taxon, "./03_Outputs/Data_Clean/breeding_success_logistic_quadratic_taxon.rds")
+
+
+
 
 
 
