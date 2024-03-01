@@ -4,9 +4,13 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-22
+## Date: 2024-03-01
 ##
 ## Description:
+## 1. Summarize and visualize the data by carcass taxon
+## 2. Model the relationship between clutch size vs. carcass weight and carcass taxon
+## 3. Model the relationship between breeding success vs. carcass weight and carcass taxon
+## 4. Model the relationship between proportion of eggs developed vs. carcass weight and carcass taxon
 ##
 ##
 ##
@@ -160,7 +164,7 @@ plot_model(clutch_size_zi_nb_quadratic_taxon,
 write_rds(clutch_size_zi_nb_quadratic_taxon, "./03_Outputs/Data_Clean/clutch_size_zi_nb_quadratic_taxon.rds")
 
 
-# 3. Breeding success vs. carcass weight and carcass type ----------------------
+# 3. Breeding success vs. carcass weight and carcass taxon ---------------------
 ### Plot
 plot_relationship_taxon(breeding_success)  # a quadratic relationship seems to exist
 
@@ -225,6 +229,181 @@ plot_model(breeding_success_logistic_quadratic_taxon,
 
 # (8) write the model results
 write_rds(breeding_success_logistic_quadratic_taxon, "./03_Outputs/Data_Clean/breeding_success_logistic_quadratic_taxon.rds")
+
+
+# 4. Proportion of eggs developed vs. carcass weight and carcass taxon ---------
+### Plot
+plot_relationship_taxon(prop_eggs_developed)  # there are some impossible values
+
+### Convert the zeros to 0.001 and values larger than 1 to 0.999
+carcass_data_clean_prop_eggs_developed <- carcass_data_clean %>% 
+  mutate(prop_eggs_developed = case_when(prop_eggs_developed >= 1 ~ 0.999,
+                                         prop_eggs_developed == 0 ~ 0.001,
+                                         TRUE ~ prop_eggs_developed))
+
+### Re-plot the modified data
+ggplot(carcass_data_clean_prop_eggs_developed, aes(x = carcass_weight, y = prop_eggs_developed, color = carcass_taxon)) + 
+  geom_point() + 
+  geom_smooth(se = F) + 
+  scale_color_brewer(palette = "Set1")  # a quadratic relationship seems to exist
+
+### Model (without reptiles)
+# (1) test quadratic term
+prop_eggs_developed_beta_linear_taxon <- glmmTMB(prop_eggs_developed ~ carcass_weight * carcass_taxon + male_size + female_size + parent_generation,
+                                           data = filter(carcass_data_clean_prop_eggs_developed, carcass_taxon != "reptiles"),
+                                           family = beta_family("logit"),
+                                           na.action = na.omit)
+
+prop_eggs_developed_beta_quadratic_taxon <- glmmTMB(prop_eggs_developed ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                              data = filter(carcass_data_clean_prop_eggs_developed, carcass_taxon != "reptiles"),
+                                              family = beta_family("logit"),
+                                              na.action = na.omit)
+
+lrtest(prop_eggs_developed_beta_linear_taxon, prop_eggs_developed_beta_quadratic_taxon)  # quadratic model is better
+AIC(prop_eggs_developed_beta_linear_taxon, prop_eggs_developed_beta_quadratic_taxon)  # quadratic model is better
+
+# (2) test interaction term
+prop_eggs_developed_beta_quadratic_wo_interaction_taxon <- glmmTMB(prop_eggs_developed ~ poly(carcass_weight, 2) + carcass_taxon + male_size + female_size + parent_generation,
+                                                             data = filter(carcass_data_clean_prop_eggs_developed, carcass_taxon != "reptiles"),
+                                                             family = beta_family("logit"),
+                                                             na.action = na.omit)
+
+lrtest(prop_eggs_developed_beta_quadratic_taxon, prop_eggs_developed_beta_quadratic_wo_interaction_taxon)  # interaction is not significant
+AIC(prop_eggs_developed_beta_quadratic_taxon, prop_eggs_developed_beta_quadratic_wo_interaction_taxon)  # model without interaction is better
+
+# (3) model diagnostics
+plot(simulateResiduals(prop_eggs_developed_beta_quadratic_taxon))  # some residual patterns
+check_model(prop_eggs_developed_beta_quadratic_taxon)
+
+# (4) model significance
+prop_eggs_developed_beta_quadratic_null_taxon <- glmmTMB(prop_eggs_developed ~ 1,
+                                                   data = filter(carcass_data_clean_prop_eggs_developed, carcass_taxon != "reptiles"),
+                                                   family = beta_family("logit"),
+                                                   na.action = na.omit)
+
+lrtest(prop_eggs_developed_beta_quadratic_taxon, prop_eggs_developed_beta_quadratic_null_taxon)  # model is globally significant
+
+# (5) model summary
+summary(prop_eggs_developed_beta_quadratic_taxon)
+# tidy(prop_eggs_developed_beta_quadratic_taxon) %>% view
+model_summary(prop_eggs_developed_beta_quadratic_taxon, model_name = "Proportion of eggs developed", transform_estimate = NULL)
+model_forest_plot(prop_eggs_developed_beta_quadratic_taxon, model_name = "Proportion of eggs developed", transform_estimate = NULL)
+Anova(prop_eggs_developed_beta_quadratic_taxon, type = 2)
+# confint(profile(prop_eggs_developed_beta_quadratic_taxon)) %>% view
+
+# (6) emmeans
+# emmeans_carcass_type_prop_eggs_developed_taxon <- emmeans(prop_eggs_developed_beta_quadratic_taxon, "carcass_taxon", type = "response")
+# emmeans_parent_generation_prop_eggs_developed_taxon <- emmeans(prop_eggs_developed_beta_quadratic_taxon, "parent_generation", type = "response")
+# 
+# pairs(regrid(emmeans_carcass_type_prop_eggs_developed_taxon))
+# pairs(regrid(emmeans_parent_generation_prop_eggs_developed_taxon))
+# 
+# cld(emmeans_carcass_type_prop_eggs_developed_taxon, adjust = "Tukey", Letters = letters)
+# cld(emmeans_parent_generation_prop_eggs_developed_taxon, adjust = "Tukey", Letters = letters)
+
+# (7) model visualization
+plot_model(prop_eggs_developed_beta_quadratic_taxon, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_taxon"))
+
+# (8) write the model results
+write_rds(prop_eggs_developed_beta_quadratic_taxon, "./03_Outputs/Data_Clean/prop_eggs_developed_beta_quadratic_taxon.rds")
+
+
+# 5. Number of larvae vs. carcass weight and carcass taxon ---------------------
+### Plot
+plot_relationship_taxon(n_larvae)  # a quadratic relationship seems to exist
+
+### Model (without reptiles)
+# (1) test quadratic term
+n_larvae_poisson_linear_taxon <- glmmTMB(n_larvae ~ carcass_weight * carcass_taxon + male_size + female_size + parent_generation,
+                                   data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                   family = "poisson",
+                                   na.action = na.omit)
+
+n_larvae_poisson_quadratic_taxon <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                      data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                      family = "poisson",
+                                      na.action = na.omit)
+
+lrtest(n_larvae_poisson_linear_taxon, n_larvae_poisson_quadratic_taxon)  # quadratic term is significant
+AIC(n_larvae_poisson_linear_taxon, n_larvae_poisson_quadratic_taxon)  # quadratic model is better
+
+# (2) test overdispersion
+n_larvae_poisson_quadratic_taxon <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                      data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                      family = "poisson",
+                                      na.action = na.omit)
+
+n_larvae_nb_quadratic_taxon <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+                                 data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                 family = "nbinom2",
+                                 na.action = na.omit)
+
+lrtest(n_larvae_poisson_quadratic_taxon, n_larvae_nb_quadratic_taxon)  # overdispersion is significant
+AIC(n_larvae_poisson_quadratic_taxon, n_larvae_nb_quadratic_taxon)  # negative binomial model is better
+
+# (3) test zero inflation
+n_larvae_zi_nb_quadratic_taxon <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) * carcass_taxon + male_size + female_size + parent_generation,
+                                    data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                    ziformula = ~ 1,
+                                    family = "nbinom2",
+                                    na.action = na.omit)
+
+testZeroInflation(n_larvae_nb_quadratic_taxon)
+lrtest(n_larvae_nb_quadratic_taxon, n_larvae_zi_nb_quadratic_taxon)  # zero inflation is significant
+AIC(n_larvae_nb_quadratic_taxon, n_larvae_zi_nb_quadratic_taxon)  # zero-inflated model is better
+
+# (4) test interaction term
+n_larvae_zi_nb_quadratic_wo_interaction_taxon <- glmmTMB(n_larvae ~ poly(carcass_weight, 2) + carcass_taxon + male_size + female_size + parent_generation,
+                                                   data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                                   ziformula = ~ 1,
+                                                   family = "nbinom2",
+                                                   na.action = na.omit)
+
+lrtest(n_larvae_zi_nb_quadratic_taxon, n_larvae_zi_nb_quadratic_wo_interaction_taxon)  # interaction is significant
+AIC(n_larvae_zi_nb_quadratic_taxon, n_larvae_zi_nb_quadratic_wo_interaction_taxon)  # model with interaction is better
+
+# (5) model diagnostics
+plot(simulateResiduals(n_larvae_zi_nb_quadratic_taxon))  # some patterns of heteroscedasticity
+check_model(n_larvae_zi_nb_quadratic_taxon)  # some patterns of heteroscedasticity
+
+# (6) model significance
+n_larvae_zi_nb_quadratic_null_taxon <- glmmTMB(n_larvae ~ 1,
+                                         data = filter(carcass_data_clean, carcass_taxon != "reptiles"),
+                                         ziformula = ~ 1,
+                                         family = "nbinom2",
+                                         na.action = na.omit)
+
+# lrtest(n_larvae_zi_nb_quadratic_null_taxon, n_larvae_zi_nb_quadratic_taxon)  # non-comparable because of the difference in sample sizes
+
+# (7) model summary
+summary(n_larvae_zi_nb_quadratic_taxon)
+# tidy(n_larvae_zi_nb_quadratic_taxon) %>% view
+model_summary(n_larvae_zi_nb_quadratic_taxon, model_name = "Number of larvae", transform_estimate = "exp")
+model_forest_plot(n_larvae_zi_nb_quadratic_taxon, model_name = "Number of larvae", transform_estimate = "exp")
+Anova(n_larvae_zi_nb_quadratic_taxon, type = 3)
+# confint(profile(n_larvae_zi_nb_quadratic)) %>% view
+
+# (8) emmeans
+# emmeans_carcass_type_n_larvae_taxon <- emmeans(n_larvae_zi_nb_quadratic_taxon, "carcass_taxon", type = "response")
+# emmeans_parent_generation_n_larvae_taxon <- emmeans(n_larvae_zi_nb_quadratic_taxon, "parent_generation", type = "response")
+# 
+# pairs(regrid(emmeans_carcass_type_n_larvae_taxon))
+# pairs(regrid(emmeans_parent_generation_n_larvae_taxon))
+# 
+# cld(emmeans_carcass_type_n_larvae_taxon, adjust = "Tukey", Letters = letters)
+# cld(emmeans_parent_generation_n_larvae_taxon, adjust = "Tukey", Letters = letters)
+
+# (9) model visualization
+plot_model(n_larvae_zi_nb_quadratic_taxon, 
+           type = "pred", 
+           terms = c("carcass_weight [0:100]", "carcass_taxon"))
+
+# (10) write the model results
+write_rds(n_larvae_zi_nb_quadratic_taxon, "./03_Outputs/Data_Clean/n_larvae_zi_nb_quadratic_taxon.rds")
+
+
 
 
 
