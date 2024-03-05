@@ -64,6 +64,11 @@ ggplot(carcass_data_clean, aes(x = carcass_taxon, y = carcass_weight)) +
   geom_point() + 
   theme_classic()
 
+ggplot(carcass_data_clean, aes(x = carcass_taxon, y = carcass_weight)) + 
+  geom_violin() + 
+  geom_point(position = position_jitter(width = 0.05)) + 
+  theme_classic()
+
 ### Test whether the carcass weight differed among the three taxa
 carcass_weight_taxon_lm <- lm(carcass_weight ~ carcass_taxon, data = carcass_data_clean)
 summary(carcass_weight_taxon_lm)
