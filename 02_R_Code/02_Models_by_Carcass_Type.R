@@ -380,7 +380,6 @@ n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
 
 # (7) model summary
 summary(n_larvae_zi_nb_quadratic)
-# tidy(n_larvae_zi_nb_quadratic) %>% view
 model_summary(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
 model_forest_plot(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
 Anova(n_larvae_zi_nb_quadratic, type = 3)
@@ -388,13 +387,8 @@ Anova(n_larvae_zi_nb_quadratic, type = 3)
 
 # (8) emmeans
 emmeans_carcass_type_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation_n_larvae <- emmeans(n_larvae_zi_nb_quadratic, "parent_generation", type = "response")
-
 pairs(regrid(emmeans_carcass_type_n_larvae))
-pairs(regrid(emmeans_parent_generation_n_larvae))
-
 cld(emmeans_carcass_type_n_larvae, adjust = "Tukey", Letters = letters)
-cld(emmeans_parent_generation_n_larvae, adjust = "Tukey", Letters = letters)
 
 # (9) model visualization
 plot_model(n_larvae_zi_nb_quadratic, 
