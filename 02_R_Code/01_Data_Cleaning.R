@@ -3,10 +3,10 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-04
+## Date: 2024-04-17
 ##
 ## Description:
-## 1. Organize and clean the breeding experiment data
+## 1. Clean and organize the breeding experiment data
 ## 2. Explore and summarize the breeding experiment data
 ##
 ## -----------------------------------------------------------------------------
@@ -32,7 +32,7 @@ carcass_data_clean <- carcass_data_raw %>%
          carcass_taxon = class,
          carcass_weight = carc_wt,
          parent_generation,
-         pair_id = pair,
+         pair_id,
          male_size,
          female_size,
          clutch_size,
@@ -76,7 +76,7 @@ summary_visualize_fun <- function(var){
   return(list(wild = wild, lab = lab))
 }
 
-### (1) Taxon compositions of the wild carcasses
+### (1) Taxon composition of the wild carcasses
 carcass_data_clean %>% 
   filter(carcass_type == "wild") %>% 
   group_by(carcass_taxon) %>% 
@@ -102,7 +102,7 @@ summary_visualize_fun(var = n_larvae)  # quite a few zeros
 summary_visualize_fun(var = total_larval_mass)  # quite a few zeros
 
 ### (8) Carcass weight loss
-summary_visualize_fun(var = carcass_weight_loss)  # a few extreme values
+summary_visualize_fun(var = carcass_weight_loss)  # a few extreme and impossible values
 
 ### (9) Breeding success
 carcass_data_clean %>%

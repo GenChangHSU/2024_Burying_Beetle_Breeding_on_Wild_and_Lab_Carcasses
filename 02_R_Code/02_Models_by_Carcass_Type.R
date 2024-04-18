@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-02-17
+## Date: 2024-04-17
 ##
 ## Description:
 ## 1. Model the relationship between clutch size vs. carcass weight and carcass type
@@ -72,7 +72,7 @@ carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
 
 ############################### Code starts here ###############################
 
-### A helper function for visualizing the bivariate relationship
+### A helper function for visualizing the bivariate relationships
 plot_relationship <- function(yvar){
   ggplot(carcass_data_clean, aes(x = carcass_weight, y = {{yvar}}, color = carcass_type)) + 
     geom_point() + 
@@ -144,8 +144,8 @@ lrtest(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction) 
 AIC(clutch_size_zi_nb_quadratic, clutch_size_zi_nb_quadratic_wo_interaction)  # model without interaction is better
 
 # (5) model diagnostics
-plot(simulateResiduals(clutch_size_zi_nb_quadratic))  # some patterns of heteroscedasticity
-check_model(clutch_size_zi_nb_quadratic)  # some patterns of heteroscedasticity
+plot(simulateResiduals(clutch_size_zi_nb_quadratic))  # acceptable
+check_model(clutch_size_zi_nb_quadratic)  # acceptable
 
 # (6) model significance
 clutch_size_zi_nb_quadratic_null <- glmmTMB(clutch_size ~ 1,
@@ -158,7 +158,6 @@ lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)  # model i
 
 # (7) model summary
 summary(clutch_size_zi_nb_quadratic)
-# tidy(clutch_size_zi_nb_quadratic) %>% view
 model_summary(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
 model_forest_plot(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
 Anova(clutch_size_zi_nb_quadratic, type = 2)
@@ -166,13 +165,8 @@ Anova(clutch_size_zi_nb_quadratic, type = 2)
 
 # (8) emmeans
 emmeans_carcass_type_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation_clutch_size <- emmeans(clutch_size_zi_nb_quadratic, "parent_generation", type = "response")
-
 pairs(regrid(emmeans_carcass_type_clutch_size))
-pairs(regrid(emmeans_parent_generation_clutch_size))
-
 cld(emmeans_carcass_type_clutch_size, adjust = "Tukey", Letters = letters)
-cld(emmeans_parent_generation_clutch_size, adjust = "Tukey", Letters = letters)
 
 # (9) model visualization
 plot_model(clutch_size_zi_nb_quadratic, 
@@ -212,8 +206,8 @@ lrtest(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_
 AIC(breeding_success_logistic_quadratic, breeding_success_logistic_quadratic_wo_interaction)  #  model with interaction is not better
 
 # (3) model diagnostics
-plot(simulateResiduals(breeding_success_logistic_quadratic))  # no obvious residual patterns
-check_model(breeding_success_logistic_quadratic)  # residual patterns acceptable
+plot(simulateResiduals(breeding_success_logistic_quadratic))  # no pattern
+check_model(breeding_success_logistic_quadratic)  # acceptable
 
 # (4) model significance
 breeding_success_logistic_quadratic_null <- glmmTMB(breeding_success ~ 1,
@@ -225,7 +219,6 @@ breeding_success_logistic_quadratic_null <- glmmTMB(breeding_success ~ 1,
 
 # (5) model summary
 summary(breeding_success_logistic_quadratic)
-# tidy(breeding_success_logistic_quadratic) %>% view
 model_summary(breeding_success_logistic_quadratic, model_name = "Breeding success", transform_estimate = "exp")
 model_forest_plot(breeding_success_logistic_quadratic, model_name = "Breeding success", transform_estimate = "exp")
 Anova(breeding_success_logistic_quadratic, type = 2)
@@ -233,13 +226,8 @@ Anova(breeding_success_logistic_quadratic, type = 2)
 
 # (6) emmeans
 emmeans_carcass_type_breeding_success <- emmeans(breeding_success_logistic_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation_breeding_success <- emmeans(breeding_success_logistic_quadratic, "parent_generation", type = "response")
-
 pairs(regrid(emmeans_carcass_type_breeding_success))
-pairs(regrid(emmeans_parent_generation_breeding_success))
-
 cld(emmeans_carcass_type_breeding_success, adjust = "Tukey", Letters = letters)
-cld(emmeans_parent_generation_breeding_success, adjust = "Tukey", Letters = letters)
 
 # (7) model visualization
 plot_model(breeding_success_logistic_quadratic, 
@@ -283,9 +271,9 @@ AIC(prop_eggs_developed_beta_linear, prop_eggs_developed_beta_quadratic)  # quad
 
 # (2) test interaction term
 prop_eggs_developed_beta_quadratic_wo_interaction <- glmmTMB(prop_eggs_developed ~ poly(carcass_weight, 2) + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
-                                                          data = carcass_data_clean_prop_eggs_developed,
-                                                          family = beta_family("logit"),
-                                                          na.action = na.omit)
+                                                             data = carcass_data_clean_prop_eggs_developed,
+                                                             family = beta_family("logit"),
+                                                             na.action = na.omit)
 
 lrtest(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_wo_interaction)  # interaction is not significant
 AIC(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_wo_interaction)  # model without interaction is better
@@ -296,29 +284,23 @@ check_model(prop_eggs_developed_beta_quadratic)
 
 # (4) model significance
 prop_eggs_developed_beta_quadratic_null <- glmmTMB(prop_eggs_developed ~ 1,
-                                                data = carcass_data_clean_prop_eggs_developed,
-                                                family = beta_family("logit"),
-                                                na.action = na.omit)
+                                                   data = carcass_data_clean_prop_eggs_developed,
+                                                   family = beta_family("logit"),
+                                                   na.action = na.omit)
 
 lrtest(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_null)  # model is globally significant
 
 # (5) model summary
 summary(prop_eggs_developed_beta_quadratic)
-# tidy(prop_eggs_developed_beta_quadratic) %>% view
-model_summary(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = NULL)
-model_forest_plot(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = NULL)
+model_summary(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = "exp")
+model_forest_plot(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = "exp")
 Anova(prop_eggs_developed_beta_quadratic, type = 2)
 # confint(profile(prop_eggs_developed_beta_quadratic)) %>% view
 
 # (6) emmeans
 emmeans_carcass_type_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_quadratic, "carcass_type", type = "response")
-emmeans_parent_generation_prop_eggs_developed <- emmeans(prop_eggs_developed_beta_quadratic, "parent_generation", type = "response")
-
 pairs(regrid(emmeans_carcass_type_prop_eggs_developed))
-pairs(regrid(emmeans_parent_generation_prop_eggs_developed))
-
 cld(emmeans_carcass_type_prop_eggs_developed, adjust = "Tukey", Letters = letters)
-cld(emmeans_parent_generation_prop_eggs_developed, adjust = "Tukey", Letters = letters)
 
 # (7) model visualization
 plot_model(prop_eggs_developed_beta_quadratic, 
