@@ -17,6 +17,7 @@
 ## 8. Plot the relationship between carcass weight loss vs. carcass weight and carcass type
 ## 9. Plot the relationship between proportion of carcass used vs. carcass weight and carcass type
 ## 10. Plot the relationship between average larval mass vs. larval density by carcass type
+## 11. Create a multipanel figure for the breeding outcomes
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -27,6 +28,7 @@ library(tidyverse)
 library(sjPlot)
 library(grid)
 library(ggplotify)
+library(patchwork)
 
 
 # Import files -----------------------------------------------------------------
@@ -294,7 +296,7 @@ p_larval_density <- plot_model(larval_density_gaussian_linear,
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   # scale_y_continuous(limits = c(-0.03, 3.2), expand = c(0, 0)) + 
   coord_cartesian(ylim = c(0.1, 2.2)) + 
-  labs(title = NULL, x = "Carcass weight (g)", y = expression(paste("Larval density (g" ^-1, ")")), color = NULL) +
+  labs(title = NULL, x = "Carcass weight (g)", y = expression(paste("Larval density (g"^-1, "carcass)")), color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
   theme(legend.position = c(0.85, 0.87),
@@ -379,7 +381,7 @@ p_average_larval_mass_larval_density <- plot_model(average_larval_mass_larval_de
   scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-0.05, 2.15), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(0, 0.45), expand = c(0, 0)) + 
-  labs(title = NULL, x = "Larval density", y = "Average larval mass (g)", color = NULL) +
+  labs(title = NULL, x = expression(paste("Larval density (g"^-1, "carcass)")), y = "Average larval mass (g)", color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
   theme(legend.position = c(0.85, 0.87),
@@ -395,9 +397,108 @@ as.ggplot(gtable_average_larval_mass_larval_density)
 ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
+# 11. Multipanel figure for the breeding outcomes ------------------------------
+### Panel (a)
+p_clutch_size_multipanel <- plot_model(clutch_size_zi_nb_quadratic, 
+                            type = "pred", 
+                            terms = c("carcass_weight [1:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = clutch_size, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-1, 75), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Clutch size", color = NULL, subtitle = "(a)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
+
+gtable_clutch_size_multipanel <- ggplotGrob(p_clutch_size_multipanel)
+gtable_clutch_size_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_clutch_size_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_clutch_size_multipanel)
+
+### Panel (b)
+p_n_larvae_multipanel <- plot_model(n_larvae_zi_nb_quadratic, 
+                         type = "pred", 
+                         terms = c("carcass_weight [1:100]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = n_larvae, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  scale_y_continuous(limits = c(-1, 55), expand = c(0, 0)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Number of larvae", color = NULL, subtitle = "(b)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
+
+gtable_n_larvae_multipanel <- ggplotGrob(p_n_larvae_multipanel)
+gtable_n_larvae_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_n_larvae_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_n_larvae_multipanel)
+
+### Panel (c)
+p_average_larval_mass_multipanel <- plot_model(average_larval_mass_gaussian_quadratic, 
+                                    type = "pred", 
+                                    terms = c("carcass_weight [3:80]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = average_larval_mass, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  # scale_y_continuous(limits = c(0, 0.5), expand = c(0, 0)) +
+  coord_cartesian(ylim = c(0.01, 0.5)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Average larval mass (g)", color = NULL, subtitle = "(c)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
+
+gtable_average_larval_mass_multipanel <- ggplotGrob(p_average_larval_mass_multipanel)
+gtable_average_larval_mass_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_average_larval_mass_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_average_larval_mass_multipanel)
+
+### Panel (d)
+p_larval_density_multipanel <- plot_model(larval_density_gaussian_linear, 
+                               type = "pred", 
+                               terms = c("carcass_weight [3:80]", "carcass_type")) +
+  geom_point(data = filter(carcass_data_clean, larval_density < 3), aes(x = carcass_weight, y = larval_density, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  # scale_y_continuous(limits = c(-0.03, 3.2), expand = c(0, 0)) + 
+  coord_cartesian(ylim = c(0.1, 2.2)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = expression(paste("Larval density (g"^-1, ")")), color = NULL, subtitle = "(d)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        axis.title.y = element_text(margin = margin(r = 2)),
+        plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5, l = -5))
+
+gtable_larval_density_multipanel <- ggplotGrob(p_larval_density_multipanel)
+gtable_larval_density_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_larval_density_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_larval_density_multipanel)
+
+(as.ggplot(gtable_clutch_size_multipanel) + as.ggplot(gtable_n_larvae_multipanel))/
+  (as.ggplot(gtable_average_larval_mass_multipanel) + as.ggplot(gtable_larval_density_multipanel))
+
+ggsave("./03_Outputs/Figures/Breeding_Outcomes.tiff", width = 9.5, height = 8, dpi = 600, device = "tiff")
 
 
 
 
-library(patchwork)
 
