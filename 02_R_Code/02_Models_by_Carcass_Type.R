@@ -382,7 +382,7 @@ n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
 summary(n_larvae_zi_nb_quadratic)
 model_summary(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
 model_forest_plot(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
-Anova(n_larvae_zi_nb_quadratic, type = 3)
+Anova(n_larvae_zi_nb_quadratic, type = 2)
 # confint(profile(n_larvae_zi_nb_quadratic)) %>% view
 
 # (8) emmeans

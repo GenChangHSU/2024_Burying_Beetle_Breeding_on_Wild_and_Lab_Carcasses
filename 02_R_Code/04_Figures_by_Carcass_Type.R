@@ -294,7 +294,7 @@ p_larval_density <- plot_model(larval_density_gaussian_linear,
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   # scale_y_continuous(limits = c(-0.03, 3.2), expand = c(0, 0)) + 
   coord_cartesian(ylim = c(0.1, 2.2)) + 
-  labs(title = NULL, x = "Carcass weight (g)", y = "Larval density \n (number per gram carcass)", color = NULL) +
+  labs(title = NULL, x = "Carcass weight (g)", y = expression(paste("Larval density (g" ^-1, ")")), color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
   theme(legend.position = c(0.85, 0.87),
@@ -398,4 +398,6 @@ ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 5
 
 
 
+
+library(patchwork)
 
