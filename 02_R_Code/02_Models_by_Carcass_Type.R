@@ -29,8 +29,6 @@ library(performance)
 library(lmtest)
 library(car)
 library(sjPlot)
-library(broom)
-library(broom.mixed)
 library(emmeans)
 library(multcomp)
 
