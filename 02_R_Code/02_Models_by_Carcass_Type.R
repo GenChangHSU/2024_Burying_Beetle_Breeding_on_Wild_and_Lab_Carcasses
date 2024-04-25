@@ -800,12 +800,12 @@ ggplot(carcass_data_clean, aes(x = larval_density, y = average_larval_mass, colo
 
 ### Model
 # (1) test interaction term
-average_larval_mass_larval_density_gaussian_linear <- glmmTMB(average_larval_mass ~ larval_density * carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+average_larval_mass_larval_density_gaussian_linear <- glmmTMB(average_larval_mass ~ larval_density * carcass_type,
                                                               data = carcass_data_clean,
                                                               family = "gaussian",
                                                               na.action = na.omit)
 
-average_larval_mass_larval_density_gaussian_linear_wo_interaction <- glmmTMB(average_larval_mass ~ larval_density + carcass_type + male_size + female_size + parent_generation + (1|generation_pair_id),
+average_larval_mass_larval_density_gaussian_linear_wo_interaction <- glmmTMB(average_larval_mass ~ larval_density + carcass_type,
                                                                              data = carcass_data_clean,
                                                                              family = "gaussian",
                                                                              na.action = na.omit)
@@ -846,6 +846,12 @@ plot_model(average_larval_mass_larval_density_gaussian_linear,
 write_rds(average_larval_mass_larval_density_gaussian_linear, "./03_Outputs/Data_Clean/average_larval_mass_larval_density_gaussian_linear.rds")
 
 
+# 11. Package citations --------------------------------------------------------
+capture.output(utils:::print.bibentry(citation(), style = "Bibtex"),
+               utils:::print.bibentry(citation("glmmTMB"), style = "Bibtex"),
+               utils:::print.bibentry(citation("DHARMa"), style = "Bibtex"),
+               utils:::print.bibentry(citation("car"), style = "Bibtex"),
+               file = "./05_References/R_Pacakge_Citations.bib")
 
 
 

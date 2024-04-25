@@ -355,7 +355,7 @@ p_prop_carcass_used <- plot_model(prop_carcass_used_beta_linear,
   scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
   scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
   scale_y_continuous(limits = c(-0.05, 0.61), expand = c(0, 0)) + 
-  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of carcass used", color = NULL) +
+  labs(title = NULL, x = "Carcass weight (g)", y = "Proportion of carcass consumed", color = NULL) +
   guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
   my_ggtheme + 
   theme(legend.position = c(0.85, 0.87),
