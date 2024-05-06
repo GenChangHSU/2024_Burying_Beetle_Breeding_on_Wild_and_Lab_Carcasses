@@ -133,5 +133,3 @@ summary_visualize_fun(var = prop_carcass_used)  # some impossible values
 
 
 
-
-
