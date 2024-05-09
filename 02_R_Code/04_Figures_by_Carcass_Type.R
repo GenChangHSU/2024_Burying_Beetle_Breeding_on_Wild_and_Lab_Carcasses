@@ -18,6 +18,7 @@
 ## 9. Plot the relationship between proportion of carcass used vs. carcass weight and carcass type
 ## 10. Plot the relationship between average larval mass vs. larval density by carcass type
 ## 11. Create a multipanel figure for the breeding outcomes
+## 12. Create a multipanel figure for the average larval mass and larval density
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -506,6 +507,58 @@ as.ggplot(gtable_total_larval_mass_without_zeros_multipanel)
 
 ggsave("./03_Outputs/Figures/Breeding_Outcomes.tiff", width = 9.5, height = 8, dpi = 600, device = "tiff")
 
+
+# 12. Multipanel figure for the average larval mass and larval density ---------
+### Panel (a)
+p_average_larval_mass_multipanel <- plot_model(average_larval_mass_gaussian_quadratic, 
+                                    type = "pred", 
+                                    terms = c("carcass_weight [3:80]", "carcass_type")) +
+  geom_point(data = carcass_data_clean, aes(x = carcass_weight, y = average_larval_mass, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  # scale_y_continuous(limits = c(0, 0.5), expand = c(0, 0)) +
+  coord_cartesian(ylim = c(0.01, 0.5)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = "Average larval mass (g)", color = NULL, subtitle = "(a)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        plot.subtitle = element_text(size = 16))
+
+### Remove the legend key borders
+gtable_average_larval_mass_multipanel <- ggplotGrob(p_average_larval_mass_multipanel)
+gtable_average_larval_mass_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_average_larval_mass_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_average_larval_mass_multipanel)
+
+### Panel (b)
+p_larval_density_multipanel <- plot_model(larval_density_gaussian_linear, 
+                               type = "pred", 
+                               terms = c("carcass_weight [3:80]", "carcass_type")) +
+  geom_point(data = filter(carcass_data_clean, larval_density < 3), aes(x = carcass_weight, y = larval_density, color = carcass_type), inherit.aes = F) + 
+  scale_color_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_fill_brewer(palette = "Set1", limits = c("lab", "wild"), label = c("Lab", "Wild")) + 
+  scale_x_continuous(limits = c(-1, 102), expand = c(0, 0)) + 
+  # scale_y_continuous(limits = c(-0.03, 3.2), expand = c(0, 0)) + 
+  coord_cartesian(ylim = c(0.1, 2.2)) + 
+  labs(title = NULL, x = "Carcass weight (g)", y = expression(paste("Larval density (g"^-1, "carcass)")), color = NULL, subtitle = "(b)") +
+  guides(color = guide_legend(byrow = T, override.aes = list(size = 1.5, fill = "white"))) + 
+  my_ggtheme + 
+  theme(legend.position = c(0.85, 0.87),
+        legend.background = element_blank(),
+        legend.key.width = unit(0.3, "in"),
+        plot.subtitle = element_text(size = 16))
+
+### Remove the legend key borders
+gtable_larval_density_multipanel <- ggplotGrob(p_larval_density_multipanel)
+gtable_larval_density_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[5]]$gp$col <- "#FFFFFF"
+gtable_larval_density_multipanel$grobs[[15]]$grobs$`99_d874966217baa2d1a56f8468aa8e76ce`$grobs[[9]]$gp$col <- "#FFFFFF"
+as.ggplot(gtable_larval_density_multipanel)
+
+as.ggplot(gtable_average_larval_mass_multipanel) + as.ggplot(gtable_larval_density_multipanel)
+ggsave("./03_Outputs/Figures/Average_Larval_Mass_Larval_Density.tiff", width = 9.5, height = 4, dpi = 600, device = "tiff")
 
 
 
