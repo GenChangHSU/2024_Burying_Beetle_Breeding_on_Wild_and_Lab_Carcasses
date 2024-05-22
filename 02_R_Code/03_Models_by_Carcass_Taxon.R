@@ -8,7 +8,7 @@
 ## Description:
 ## 1. Summarize and visualize the data by carcass taxon
 ## 2. Model the relationship between number of larvae vs. carcass taxon
-## 3 Model the relationship between total larval mass (without zeros) vs. carcass taxon
+## 3. Model the relationship between total larval mass (without zeros) vs. carcass taxon
 ## 4. Model the relationship between average larval mass vs. carcass taxon
 ## 5. Model the relationship between proportion of carcass used vs. carcass taxon
 ##
