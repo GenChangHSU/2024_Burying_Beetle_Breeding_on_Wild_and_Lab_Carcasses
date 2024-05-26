@@ -129,19 +129,19 @@ summary_visualize_fun(var = prop_carcass_used)  # some impossible values
 
 # 3. Nutritional composition data organization and cleaning --------------------
 nutrition_data_clean <- nutrition_data_raw %>% 
-  dplyr::select(carcass_id = newid,
+  dplyr::select(block_id = bl,
+                carcass_id = newid,
                 carcass_source = carc.type,
                 tissue_type = type,
                 tissue_replication = rep,
-                block_id = bl, 
-                wet_mass = wetmass,
-                water_mass = water,
-                dry_mass = drymass,
-                protein_mass = protein,
-                fat_mass = oil,
-                total_mass = sum) %>% 
-  mutate(prop_protein = protein_mass/total_mass,
-         fat_mass = fat_mass/total_mass) %>% 
+                wet_mass_g = wetmass,
+                water_mass_g = water,
+                dry_mass_g = drymass,
+                protein_mass_g = protein,
+                fat_mass_g = oil,
+                total_mass_g = sum) %>% 
+  mutate(prop_protein = protein_mass_g/total_mass_g,
+         prop_fat = fat_mass_g/total_mass_g) %>% 
   mutate(carcass_type = if_else(carcass_source == "lab", "lab", "wild"),
          carcass_taxon = if_else(carcass_source == "lab", "mouse", carcass_source),
          .after = carcass_source) %>% 
@@ -155,7 +155,84 @@ nutrition_data_clean <- nutrition_data_raw %>%
 write_csv(nutrition_data_clean, "./03_Outputs/Data_Clean/Nutrition_Data_Clean.csv")
 
 
+# 4. Data exploration and summary ----------------------------------------------
+### (1) Number of lab and wild carcasses analyzed
+nutrition_data_clean %>% 
+  group_by(carcass_type) %>% 
+  summarise(n = length(unique(carcass_id)))
+  
+### (2) Number of carcasses for each wild taxon
+nutrition_data_clean %>% 
+  filter(carcass_type == "wild") %>% 
+  group_by(carcass_taxon) %>% 
+  summarise(n = length(unique(carcass_id)))
+
+### (3) Mean protein and fat content of lab and wild carcasses
+nutrition_data_clean %>% 
+  group_by(carcass_type) %>%
+  summarise(mean_prop_protein = mean(prop_protein),
+            mean_prop_fat = mean(prop_fat))
+
+### (4) Mean protein and fat content of wild carcass taxa
+nutrition_data_clean %>%
+  filter(carcass_type == "wild") %>% 
+  group_by(carcass_taxon) %>%
+  summarise(mean_prop_protein = mean(prop_protein),
+            mean_prop_fat = mean(prop_fat))
 
 
+# 5. Larval growth data organization and cleaning ------------------------------
+larval_growth_data_clean <- larval_growth_data_raw %>% 
+  dplyr::select(block_id = bl,
+                carcass_id = id,
+                carcass_type = tr,
+                carcass_taxon = carc.type,
+                tissue_type = type,
+                tissue_replication = rep,
+                tissue_mass_g = mass,
+                family_id = family,
+                success = success,
+                initial_larval_mass_g = mass_1st,
+                end_larval_mass_g = mass_2nd,
+                mean_prop_protein = avg_prop_protein,
+                mean_prop_fat = avg_prop_oil) %>% 
+  mutate(carcass_taxon = if_else(carcass_type == "lab", "mouse", carcass_taxon),
+         larval_weight_gain = end_larval_mass_g - initial_larval_mass_g,
+         .after = end_larval_mass_g) %>% 
+  mutate(carcass_taxon = case_when(carcass_taxon == "snake" ~ "reptile",
+                                   carcass_taxon == "mouse" ~ "mammal",
+                                   TRUE ~ carcass_taxon),
+         tissue_type = case_when(tissue_type == "i" ~ "viscera",
+                                 tissue_type == "m" ~ "muscle"))
+  
+write_csv(larval_growth_data_clean, "./03_Outputs/Data_Clean/Larval_Growth_Data_Clean.csv")
+
+
+# 6. Data exploration and summary ----------------------------------------------
+### (1) Number of lab and wild carcasses analyzed
+larval_growth_data_clean %>% 
+  group_by(carcass_type, tissue_type) %>% 
+  summarise(n = n())
+
+### (2) Number of carcasses for each wild taxon
+larval_growth_data_clean %>% 
+  filter(carcass_type == "wild") %>% 
+  group_by(carcass_taxon, tissue_type) %>% 
+  summarise(n = n())
+
+### (3) Larval survival rates and growth on lab and wild carcasses
+larval_growth_data_clean %>% 
+  group_by(carcass_type, tissue_type) %>% 
+  summarise(n = n(),
+            prop_survived = sum(success)/n,
+            mean_larval_weight_gain = mean(larval_weight_gain, na.rm = T))
+
+### (4) Larval survival rates and growth on wild carcass taxa
+larval_growth_data_clean %>% 
+  filter(carcass_type == "wild") %>% 
+  group_by(carcass_taxon, tissue_type) %>% 
+  summarise(n = n(),
+            prop_survived = sum(success)/n,
+            mean_larval_weight_gain = mean(larval_weight_gain, na.rm = T))
 
 

@@ -1,70 +1,6 @@
-####nutrient composition of carcasses and larval growth####
-setwd("/Users/sun/Library/CloudStorage/Dropbox/paper/new lab paper/Sun Lab dropbox/data/wild carcass/protein content")
-
-library(glmmTMB)
-library(lme4)
-library(car)
-library(ggplot2)
-library(emmeans)
-library(multcomp)
-library(tidyverse)
-library(ggpubr)
-
-# ggplot theme -----------------------------------------------------------------
-my_ggtheme <- 
-  theme(
-    # axis
-    axis.text.x = element_text(size = 14, color = "black", margin = margin(t = 3)),
-    axis.text.y = element_text(size = 14, color = "black"),
-    axis.title.x = element_text(size = 16, margin = margin(t = 10)),
-    axis.title.y = element_text(size = 16, margin = margin(r = 8)),
-    axis.ticks.length.x = unit(0.18, "cm"),
-    axis.ticks.length.y = unit(0.15, "cm"),
-    
-    # plot
-    plot.title = element_text(hjust = 0.5, size = 18),
-    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),
-    plot.background = element_rect(colour = "transparent"),
-    
-    # panel
-    panel.background = element_rect(fill = "transparent"),
-    panel.border = element_rect(colour = "black", fill = NA, size = 0.5), # corrected here
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    
-    # legend
-    legend.position = "right",
-    legend.spacing.x = unit(0.2, "cm"),
-    legend.spacing.y = unit(0.2, "cm"),
-    legend.key.width = unit(0.5, "cm"),
-    legend.key.size = unit(0.5, "line"),
-    legend.key = element_blank(),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 13),
-    legend.box.just = "center",
-    legend.justification = c(0.5, 0.5),
-    legend.title.align = 0.5,
-    legend.background = element_rect(fill = "transparent", size = 0.25, linetype = "solid", colour = "black"),
-    
-    # facet strip
-    strip.background = element_rect(fill = "transparent"),
-    strip.text = element_text(size = 13, hjust = 0.5)
-  )
 
 
 # 1. Nutritional composition ----------------------------------------------
-
-#nutrient composition
-nutrient<-read.csv("nutrient_for_avg.csv")
-
-#group mouse, bird, snake as wild carcass
-nutrient$carc.type <- factor(nutrient$carc.type, levels=c("lab", "mouse", "bird", "snake"))
-levels(nutrient$carc.type)[levels(nutrient$carc.type) == "mouse"] <- "mammal"
-levels(nutrient$carc.type)[levels(nutrient$carc.type) == "snake"] <- "reptile"
-nutrient$tr <- ifelse(nutrient$carc.type == 'lab', 'lab', 'wild')
-nutrient_wild <- nutrient[nutrient$carc.type!="lab",]
 
 model_protein <- glmmTMB(prop_protein ~ tr + type + (1|bl/id/rep),
                      data = nutrient,
@@ -185,15 +121,6 @@ print(d_model_oil)
 
 
 # 2. Larval growth --------------------------------------------------------
-
-
-
-feeding<-read.csv("feeding_exp.csv")
-#group mouse, bird, snake as wild carcass
-feeding$carc.type <- factor(feeding$carc.type, levels=c("lab", "mouse", "bird", "snake"))
-levels(feeding$carc.type)[levels(feeding$carc.type) == "mouse"] <- "mammal"
-levels(feeding$carc.type)[levels(feeding$carc.type) == "snake"] <- "reptile"
-feeding_wild <- feeding[feeding$carc.type!="lab",]
 
 #lab v. wild
 model_feeding <- glmmTMB(mass_2nd ~ tr + type + mass_1st+ (1|bl/family/rep),
