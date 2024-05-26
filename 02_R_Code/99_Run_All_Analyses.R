@@ -12,7 +12,8 @@
 source("./02_R_Code/01_Data_Cleaning.R")
 source("./02_R_Code/02_Models_by_Carcass_Source.R")
 source("./02_R_Code/03_Models_by_Carcass_Taxon.R")
-source("./02_R_Code/04_Figures.R")
+source("./02_R_Code/04_Models_Nutrition_and_Larval_Growth.R")
+source("./02_R_Code/05_Figures.R")
 
 
 

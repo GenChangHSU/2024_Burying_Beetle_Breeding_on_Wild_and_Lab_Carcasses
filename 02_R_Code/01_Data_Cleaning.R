@@ -1,13 +1,17 @@
 ## -----------------------------------------------------------------------------
-## Title: Organize and explore the burying beetle breeding experiment data
+## Title: Organize and explore the burying beetle experiment data
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-04-17
+## Date: 2024-05-26
 ##
 ## Description:
 ## 1. Clean and organize the breeding experiment data
 ## 2. Explore and summarize the breeding experiment data
+## 3. Clean and organize the carcass nutritional composition data
+## 4. Explore and summarize the carcass nutritional composition data
+## 5. Clean and organize the larval feeding experiments data
+## 6. Explore and summarize the larval feeding experiments data
 ##
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -19,12 +23,14 @@ library(readxl)
 
 
 # Import files -----------------------------------------------------------------
-carcass_data_raw <- read_xls("./01_Data_Raw/Carcass_Data_All.xls", sheet = 1)
+carcass_data_raw <- read_xls("./01_Data_Raw/Breeding_Data_All.xls", sheet = 1)
+nutrition_data_raw <- read_xls("./01_Data_Raw/Nutrition_Data.xls", sheet = 1)
+larval_growth_data_raw <- read_xls("./01_Data_Raw/Larval_Growth_Data.xls", sheet = 1)
 
 
 ############################### Code starts here ###############################
 
-# 1. Data organization and cleaning --------------------------------------------
+# 1. Breeding experiment data organization and cleaning ------------------------
 carcass_data_clean <- carcass_data_raw %>% 
   dplyr::select(date,
          carcass_sp_Chinese = sp_chinese,
@@ -49,9 +55,7 @@ carcass_data_clean <- carcass_data_raw %>%
   mutate(date = ymd(date)) %>%
   relocate(generation_pair_id, .after = pair_id)
 
-view(carcass_data_clean)
-
-write_csv(carcass_data_clean, "./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
+write_csv(carcass_data_clean, "./03_Outputs/Data_Clean/Breeding_Data_Clean.csv")
 
 
 # 2. Data exploration and summary ----------------------------------------------
@@ -123,10 +127,32 @@ summary_visualize_fun(var = larval_density)
 summary_visualize_fun(var = prop_carcass_used)  # some impossible values
 
 
+# 3. Nutritional composition data organization and cleaning --------------------
+nutrition_data_clean <- nutrition_data_raw %>% 
+  dplyr::select(carcass_id = newid,
+                carcass_source = carc.type,
+                tissue_type = type,
+                tissue_replication = rep,
+                block_id = bl, 
+                wet_mass = wetmass,
+                water_mass = water,
+                dry_mass = drymass,
+                protein_mass = protein,
+                fat_mass = oil,
+                total_mass = sum) %>% 
+  mutate(prop_protein = protein_mass/total_mass,
+         fat_mass = fat_mass/total_mass) %>% 
+  mutate(carcass_type = if_else(carcass_source == "lab", "lab", "wild"),
+         carcass_taxon = if_else(carcass_source == "lab", "mouse", carcass_source),
+         .after = carcass_source) %>% 
+  mutate(carcass_taxon = case_when(carcass_taxon == "snake" ~ "reptile",
+                                   carcass_taxon == "mouse" ~ "mammal",
+                                   TRUE ~ carcass_taxon),
+         tissue_type = case_when(tissue_type == "i" ~ "viscera",
+                                 tissue_type == "m" ~ "muscle")) %>% 
+  dplyr::select(-carcass_source)
 
-
-
-
+write_csv(nutrition_data_clean, "./03_Outputs/Data_Clean/Nutrition_Data_Clean.csv")
 
 
 

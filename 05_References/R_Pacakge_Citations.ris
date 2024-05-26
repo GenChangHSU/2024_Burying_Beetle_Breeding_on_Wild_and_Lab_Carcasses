@@ -50,3 +50,12 @@ PB  - Sage
 CY  - Thousand Oaks CA
 UR  - https://socialsciences.mcmaster.ca/jfox/Books/Companion/
 ER  - 
+
+TY  - MISC
+AU  - Lenth, Russell V
+TI  - emmeans: Estimated Marginal Means, aka Least-Squares Means
+PY  - 2024
+DA  - 2024
+UR  - https://CRAN.R-project.org/package=emmeans
+N1  - R package version 1.10.0
+ER  - 

@@ -32,7 +32,7 @@ library(multcomp)
 
 
 # Import files -----------------------------------------------------------------
-carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Carcass_Data_Clean.csv")
+carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Breeding_Data_Clean.csv")
 
 
 ############################### Code starts here ###############################
