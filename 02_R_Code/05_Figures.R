@@ -134,6 +134,17 @@ carcass_data_clean_wild_restricted <- carcass_data_clean_wild %>%
 color_pal <- c("#E69F00", "#009E73", "#8856a7") %>% 
   set_names(nm = c("mammal", "bird", "reptile"))
 
+### Reorder the three wild carcass taxa
+carcass_data_clean_wild_restricted <- carcass_data_clean_wild_restricted %>% 
+  mutate(carcass_taxon = fct_relevel(carcass_taxon, "mammal", "bird", "reptile"))
+
+nutrition_data_clean <- nutrition_data_clean %>% 
+  mutate(carcass_taxon = fct_relevel(carcass_taxon, "mammal", "bird", "reptile"))
+
+larval_growth_data_clean <- larval_growth_data_clean %>% 
+  mutate(carcass_taxon = fct_relevel(carcass_taxon, "mammal", "bird", "reptile"))
+
+
 # 1. Clutch size vs. carcass weight and carcass type ---------------------------
 ### A scatterplot with model fitted lines
 p_clutch_size <- plot_model(clutch_size_zi_nb_quadratic, 
@@ -752,24 +763,177 @@ ggsave("./03_Outputs/Figures/Breeding_Outcomes_Taxon.tiff", width = 8, height = 
 
 
 # 18. Protein content vs. carcass type -----------------------------------------
+ggplot(nutrition_data_clean) + 
+  geom_point(aes(x = carcass_type, y = prop_protein), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = prop_protein, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(0.08, 0.62), expand = c(0, 0), labels = c("10", "20", "30", "40", "50", "60")) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Proportion of protein (%)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Protein_Content_Carcass_Type.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 19. Fat content vs. carcass type ---------------------------------------------
+ggplot(nutrition_data_clean) + 
+  geom_point(aes(x = carcass_type, y = prop_fat), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = prop_fat, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(-0.02, 0.62), expand = c(0, 0), breaks = seq(0, 0.6, 0.1), labels = c("0", "10", "20", "30", "40", "50", "60")) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Proportion of fat (%)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Fat_Content_Carcass_Type.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 20. Protein content vs. carcass taxon ----------------------------------------
+ggplot(filter(nutrition_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = prop_protein), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = prop_protein, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(0.08, 0.62), expand = c(0, 0), labels = c("10", "20", "30", "40", "50", "60")) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Proportion of protein (%)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Protein_Content_Carcass_Taxon.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 21. Fat content vs. carcass taxon --------------------------------------------
+ggplot(filter(nutrition_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = prop_fat), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = prop_fat, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(-0.02, 0.62), expand = c(0, 0), breaks = seq(0, 0.6, 0.1), labels = c("0", "10", "20", "30", "40", "50", "60")) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Proportion of fat (%)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Fat_Content_Carcass_Taxon.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 22. Larval growth vs. carcass type -------------------------------------------
+ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = carcass_type, y = larval_weight_gain_g), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = larval_weight_gain_g, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Larval_Growth_Carcass_Type.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 23. Larval growth vs. carcass taxon ------------------------------------------
+ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = larval_weight_gain_g), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = larval_weight_gain_g, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Larval_Growth_Carcass_Taxon.tiff", width = 4, height = 4, dpi = 600, device = "tiff")
 
 
 # 24. Multipanel figure for the nutritional composition and larval growth ------
+### Panel (a)
+p_protein_content_carcass_type <- ggplot(nutrition_data_clean) + 
+  geom_point(aes(x = carcass_type, y = prop_protein), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = prop_protein, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(0.08, 0.62), expand = c(0, 0), labels = c("10", "20", "30", "40", "50", "60")) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Proportion of protein (%)", subtitle = "(a)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        axis.title.y = element_text(size = 16, margin = margin(r = -2, l = 8)),
+        plot.margin = margin(r = 20, b = 5))
+
+### Panel (b)
+p_protein_content_carcass_taxon <- ggplot(filter(nutrition_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = prop_protein), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = prop_protein, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(0.08, 0.62), expand = c(0, 0), labels = c("10", "20", "30", "40", "50", "60")) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Proportion of protein (%)", subtitle = "(b)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        axis.title.y = element_text(size = 16, margin = margin(r = 10, l = 2)),
+        plot.margin = margin(r = 20, b = 5))
+
+### Panel (c)
+p_fat_content_carcass_type <- ggplot(nutrition_data_clean) + 
+  geom_point(aes(x = carcass_type, y = prop_fat), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = prop_fat, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(-0.02, 0.62), expand = c(0, 0), breaks = seq(0, 0.6, 0.1), labels = c("0", "10", "20", "30", "40", "50", "60")) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Proportion of fat (%)", subtitle = "(c)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        axis.title.y = element_text(size = 16, margin = margin(r = -2, l = 8)),
+        plot.margin = margin(r = 20, b = 5))
+
+### Panel (d)
+p_fat_content_carcass_taxon <- ggplot(filter(nutrition_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = prop_fat), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = prop_fat, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(-0.02, 0.62), expand = c(0, 0), breaks = seq(0, 0.6, 0.1), labels = c("0", "10", "20", "30", "40", "50", "60")) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Proportion of fat (%)", subtitle = "(d)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        axis.title.y = element_text(size = 16, margin = margin(r = 10, l = 2)),
+        plot.margin = margin(r = 20, b = 5))
+
+### Panel (e)
+p_larval_growth_carcass_type <- ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = carcass_type, y = larval_weight_gain_g), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_type, y = larval_weight_gain_g, color = carcass_type), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Lab", "Wild")) + 
+  scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Carcass source", y = "Larval growth (g)", subtitle = "(e)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 13, b = 5))
+
+### Panel (f)
+p_larval_growth_carcass_taxon <- ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = carcass_taxon, y = larval_weight_gain_g), alpha = 0.2, position = position_jitter(width = 0.05)) + 
+  stat_summary(aes(x = carcass_taxon, y = larval_weight_gain_g, color = carcass_taxon), 
+               fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
+  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
+  scale_color_manual(values = color_pal) + 
+  labs(x = "Carcass taxon", y = "Larval growth (g)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
+
+(p_protein_content_carcass_type + p_protein_content_carcass_taxon)/
+  (p_fat_content_carcass_type + p_fat_content_carcass_taxon)/
+  (p_larval_growth_carcass_type + p_larval_growth_carcass_taxon)
+
+ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth.tiff", width = 8, height = 10.5, dpi = 600, device = "tiff")
 
 
 # 25.1. Larval growth vs. protein content (both lab and wild carcasses) --------
@@ -785,6 +949,23 @@ ggsave("./03_Outputs/Figures/Breeding_Outcomes_Taxon.tiff", width = 8, height = 
 
 
 # 27. Multipanel figure for the nutritional composition vs. larval growth ------
+### Panel (a)
+
+
+### Panel (b)
+
+
+### Panel (c)
+
+
+### Panel (d)
+
+
+
+(p_protein_content_carcass_type + p_protein_content_carcass_taxon)/
+  (p_fat_content_carcass_type + p_fat_content_carcass_taxon)
+
+ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth_Regression.tiff", width = 8, height = 10.5, dpi = 600, device = "tiff")
 
 
 
