@@ -35,6 +35,36 @@ library(multcomp)
 carcass_data_clean <- read_csv("./03_Outputs/Data_Clean/Breeding_Data_Clean.csv")
 
 
+# Model summary and plot functions from the package "sjPlot" -------------------
+model_summary <- function(model, transform_estimate) {
+  tab_model(model,
+            auto.label = T,
+            show.est = T,
+            show.se = T,
+            show.ci = 0.95,
+            show.stat = T,
+            show.p = T,
+            show.reflvl = F,
+            col.order = c("est", "se", "ci", "stat", "p"),
+            transform = transform_estimate,
+            show.zeroinf = T,
+            string.ci = "95% CI",
+            string.se = "SE",
+            string.stat = "Test statistic",
+            string.p = "P")
+}
+
+model_forest_plot <- function(model, transform_estimate) {
+  plot_model(model, 
+             sort.est = T,
+             transform = transform_estimate,
+             show.values = T,
+             show.p = T,
+             value.offset = 0.3,
+             vline.color = "red")
+}
+
+
 ############################### Code starts here ###############################
 
 # 1. Data summary and visualization --------------------------------------------
@@ -129,8 +159,8 @@ n_larvae_zi_nb_null_taxon <- glmmTMB(n_larvae ~ 1,
 
 # (5) model summary
 summary(n_larvae_zi_nb_taxon)
-model_summary(n_larvae_zi_nb_taxon, model_name = "Number of larvae", transform_estimate = "exp")
-model_forest_plot(n_larvae_zi_nb_taxon, model_name = "Number of larvae", transform_estimate = "exp")
+model_summary(n_larvae_zi_nb_taxon, transform_estimate = "exp")
+model_forest_plot(n_larvae_zi_nb_taxon, transform_estimate = "exp")
 Anova(n_larvae_zi_nb_taxon, type = 2)
 # confint(profile(n_larvae_zi_nb_taxon)) %>% view
 
@@ -174,8 +204,8 @@ lrtest(total_larval_mass_gaussian_taxon, total_larval_mass_gaussian_taxon_null) 
 
 # (4) model summary
 summary(total_larval_mass_gaussian_taxon)
-model_summary(total_larval_mass_gaussian_taxon, model_name = "Total larval mass", transform_estimate = NULL)
-model_forest_plot(total_larval_mass_gaussian_taxon, model_name = "Total larval mass", transform_estimate = NULL)
+model_summary(total_larval_mass_gaussian_taxon, transform_estimate = NULL)
+model_forest_plot(total_larval_mass_gaussian_taxon, transform_estimate = NULL)
 Anova(total_larval_mass_gaussian_taxon, type = 2)
 # confint(profile(total_larval_mass_gaussian_taxon)) %>% view
 
@@ -214,8 +244,8 @@ lrtest(average_larval_mass_gaussian_taxon, average_larval_mass_gaussian_taxon_nu
 
 # (4) model summary
 summary(average_larval_mass_gaussian_taxon)
-model_summary(average_larval_mass_gaussian_taxon, model_name = "average larval mass", transform_estimate = NULL)
-model_forest_plot(average_larval_mass_gaussian_taxon, model_name = "average larval mass", transform_estimate = NULL)
+model_summary(average_larval_mass_gaussian_taxon, transform_estimate = NULL)
+model_forest_plot(average_larval_mass_gaussian_taxon, transform_estimate = NULL)
 Anova(average_larval_mass_gaussian_taxon, type = 2)
 # confint(profile(average_larval_mass_gaussian_taxon)) %>% view
 
@@ -259,8 +289,8 @@ lrtest(prop_carcass_used_beta_taxon, prop_carcass_used_beta_taxon_null)  # model
 
 # (5) model summary
 summary(prop_carcass_used_beta_taxon)
-model_summary(prop_carcass_used_beta_taxon, model_name = "Proportion of carcass used", transform_estimate = "exp")
-model_forest_plot(prop_carcass_used_beta_taxon, model_name = "Proportion of carcass used", transform_estimate = "exp")
+model_summary(prop_carcass_used_beta_taxon, transform_estimate = "exp")
+model_forest_plot(prop_carcass_used_beta_taxon, transform_estimate = "exp")
 Anova(prop_carcass_used_beta_taxon, type = 2)
 # confint(profile(prop_carcass_used_beta_taxon)) %>% view
 

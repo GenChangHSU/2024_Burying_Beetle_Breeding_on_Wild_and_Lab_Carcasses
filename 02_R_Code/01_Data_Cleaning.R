@@ -197,7 +197,7 @@ larval_growth_data_clean <- larval_growth_data_raw %>%
                 mean_prop_protein = avg_prop_protein,
                 mean_prop_fat = avg_prop_oil) %>% 
   mutate(carcass_taxon = if_else(carcass_type == "lab", "mouse", carcass_taxon),
-         larval_weight_gain = end_larval_mass_g - initial_larval_mass_g,
+         larval_weight_gain_g = end_larval_mass_g - initial_larval_mass_g,
          .after = end_larval_mass_g) %>% 
   mutate(carcass_taxon = case_when(carcass_taxon == "snake" ~ "reptile",
                                    carcass_taxon == "mouse" ~ "mammal",
@@ -225,7 +225,7 @@ larval_growth_data_clean %>%
   group_by(carcass_type, tissue_type) %>% 
   summarise(n = n(),
             prop_survived = sum(success)/n,
-            mean_larval_weight_gain = mean(larval_weight_gain, na.rm = T))
+            mean_larval_weight_gain_g = mean(larval_weight_gain_g, na.rm = T))
 
 ### (4) Larval survival rates and growth on wild carcass taxa
 larval_growth_data_clean %>% 
@@ -233,6 +233,6 @@ larval_growth_data_clean %>%
   group_by(carcass_taxon, tissue_type) %>% 
   summarise(n = n(),
             prop_survived = sum(success)/n,
-            mean_larval_weight_gain = mean(larval_weight_gain, na.rm = T))
+            mean_larval_weight_gain_g = mean(larval_weight_gain_g, na.rm = T))
 
 

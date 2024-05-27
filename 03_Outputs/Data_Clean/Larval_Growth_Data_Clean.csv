@@ -1,4 +1,4 @@
-block_id,carcass_id,carcass_type,carcass_taxon,tissue_type,tissue_replication,tissue_mass_g,family_id,success,initial_larval_mass_g,end_larval_mass_g,larval_weight_gain,mean_prop_protein,mean_prop_fat
+block_id,carcass_id,carcass_type,carcass_taxon,tissue_type,tissue_replication,tissue_mass_g,family_id,success,initial_larval_mass_g,end_larval_mass_g,larval_weight_gain_g,mean_prop_protein,mean_prop_fat
 1,1,wild,bird,muscle,1,0.40819,24,0,0.0028,NA,NA,0.262984096,0.197876556
 1,1,wild,bird,muscle,2,0.4075,21,0,0.00306,NA,NA,0.262984096,0.197876556
 1,1,wild,bird,muscle,3,0.39711,44,0,0.00296,NA,NA,0.262984096,0.197876556

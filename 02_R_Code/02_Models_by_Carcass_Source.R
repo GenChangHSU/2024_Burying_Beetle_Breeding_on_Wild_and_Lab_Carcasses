@@ -34,9 +34,8 @@ library(multcomp)
 
 
 # Model summary and plot functions from the package "sjPlot" -------------------
-model_summary <- function(model, model_name, transform_estimate) {
+model_summary <- function(model, transform_estimate) {
   tab_model(model,
-            dv.labels = model_name,
             auto.label = T,
             show.est = T,
             show.se = T,
@@ -53,15 +52,14 @@ model_summary <- function(model, model_name, transform_estimate) {
             string.p = "P")
 }
 
-model_forest_plot <- function(model, model_name, transform_estimate) {
+model_forest_plot <- function(model, transform_estimate) {
   plot_model(model, 
              sort.est = T,
              transform = transform_estimate,
              show.values = T,
              show.p = T,
              value.offset = 0.3,
-             vline.color = "red",
-             title = model_name)
+             vline.color = "red")
 }
 
 # Import files -----------------------------------------------------------------
@@ -159,8 +157,8 @@ lrtest(clutch_size_zi_nb_quadratic_null, clutch_size_zi_nb_quadratic)  # model i
 
 # (7) model summary
 summary(clutch_size_zi_nb_quadratic)
-model_summary(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
-model_forest_plot(clutch_size_zi_nb_quadratic, model_name = "Clutch size", transform_estimate = "exp")
+model_summary(clutch_size_zi_nb_quadratic, transform_estimate = "exp")
+model_forest_plot(clutch_size_zi_nb_quadratic, transform_estimate = "exp")
 Anova(clutch_size_zi_nb_quadratic, type = 2)
 # confint(profile(clutch_size_zi_nb_quadratic)) %>% view
 
@@ -229,8 +227,8 @@ breeding_success_binomial_quadratic_null <- glmmTMB(breeding_success ~ 1,
 
 # (6) model summary
 summary(breeding_success_binomial_quadratic)
-model_summary(breeding_success_binomial_quadratic, model_name = "Breeding success", transform_estimate = "exp")
-model_forest_plot(breeding_success_binomial_quadratic, model_name = "Breeding success", transform_estimate = "exp")
+model_summary(breeding_success_binomial_quadratic, transform_estimate = "exp")
+model_forest_plot(breeding_success_binomial_quadratic, transform_estimate = "exp")
 Anova(breeding_success_binomial_quadratic, type = 2)
 # confint(profile(breeding_success_binomial_quadratic)) %>% view
 
@@ -302,8 +300,8 @@ lrtest(prop_eggs_developed_beta_quadratic, prop_eggs_developed_beta_quadratic_nu
 
 # (5) model summary
 summary(prop_eggs_developed_beta_quadratic)
-model_summary(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = "exp")
-model_forest_plot(prop_eggs_developed_beta_quadratic, model_name = "Proportion of eggs developed", transform_estimate = "exp")
+model_summary(prop_eggs_developed_beta_quadratic, transform_estimate = "exp")
+model_forest_plot(prop_eggs_developed_beta_quadratic, transform_estimate = "exp")
 Anova(prop_eggs_developed_beta_quadratic, type = 2)
 # confint(profile(prop_eggs_developed_beta_quadratic)) %>% view
 
@@ -390,8 +388,8 @@ n_larvae_zi_nb_quadratic_null <- glmmTMB(n_larvae ~ 1,
 
 # (7) model summary
 summary(n_larvae_zi_nb_quadratic)
-model_summary(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
-model_forest_plot(n_larvae_zi_nb_quadratic, model_name = "Number of larvae", transform_estimate = "exp")
+model_summary(n_larvae_zi_nb_quadratic, transform_estimate = "exp")
+model_forest_plot(n_larvae_zi_nb_quadratic, transform_estimate = "exp")
 Anova(n_larvae_zi_nb_quadratic, type = 2)
 # confint(profile(n_larvae_zi_nb_quadratic)) %>% view
 
@@ -451,8 +449,8 @@ lrtest(total_larval_mass_tweedie_quadratic, total_larval_mass_tweedie_quadratic_
 
 # (5) model summary
 summary(total_larval_mass_tweedie_quadratic)
-model_summary(total_larval_mass_tweedie_quadratic, model_name = "Total larval mass", transform_estimate = NULL)
-model_forest_plot(total_larval_mass_tweedie_quadratic, model_name = "Total larval mass", transform_estimate = NULL)
+model_summary(total_larval_mass_tweedie_quadratic, transform_estimate = NULL)
+model_forest_plot(total_larval_mass_tweedie_quadratic, transform_estimate = NULL)
 Anova(total_larval_mass_tweedie_quadratic, type = 2)
 # confint(profile(total_larval_mass_tweedie_quadratic)) %>% view
 
@@ -519,8 +517,8 @@ lrtest(total_larval_mass_gaussian_quadratic, total_larval_mass_gaussian_quadrati
 
 # (5) model summary
 summary(total_larval_mass_gaussian_quadratic)
-model_summary(total_larval_mass_gaussian_quadratic, model_name = "Total larval mass", transform_estimate = NULL)
-model_forest_plot(total_larval_mass_gaussian_quadratic, model_name = "Total larval mass", transform_estimate = NULL)
+model_summary(total_larval_mass_gaussian_quadratic, transform_estimate = NULL)
+model_forest_plot(total_larval_mass_gaussian_quadratic, transform_estimate = NULL)
 Anova(total_larval_mass_gaussian_quadratic, type = 2)
 # confint(profile(total_larval_mass_gaussian_quadratic)) %>% view
 
@@ -588,8 +586,8 @@ lrtest(total_larval_mass_gaussian_quadratic_large_removed, total_larval_mass_gau
 
 # (5) model summary
 summary(total_larval_mass_gaussian_quadratic_large_removed)
-model_summary(total_larval_mass_gaussian_quadratic_large_removed, model_name = "Total larval mass", transform_estimate = NULL)
-model_forest_plot(total_larval_mass_gaussian_quadratic_large_removed, model_name = "Total larval mass", transform_estimate = NULL)
+model_summary(total_larval_mass_gaussian_quadratic_large_removed, transform_estimate = NULL)
+model_forest_plot(total_larval_mass_gaussian_quadratic_large_removed, transform_estimate = NULL)
 Anova(total_larval_mass_gaussian_quadratic_large_removed, type = 2)
 # confint(profile(total_larval_mass_gaussian_quadratic_large_removed)) %>% view
 
@@ -649,8 +647,8 @@ lrtest(average_larval_mass_gaussian_quadratic, average_larval_mass_gaussian_quad
 
 # (5) model summary
 summary(average_larval_mass_gaussian_quadratic)
-model_summary(average_larval_mass_gaussian_quadratic, model_name = "Average larval mass", transform_estimate = NULL)
-model_forest_plot(average_larval_mass_gaussian_quadratic, model_name = "Average larval mass", transform_estimate = NULL)
+model_summary(average_larval_mass_gaussian_quadratic, transform_estimate = NULL)
+model_forest_plot(average_larval_mass_gaussian_quadratic, transform_estimate = NULL)
 Anova(average_larval_mass_gaussian_quadratic, type = 2)
 # confint(profile(average_larval_mass_gaussian_quadratic)) %>% view
 
@@ -710,8 +708,8 @@ larval_density_gaussian_linear_null <- glmmTMB(larval_density ~ 1,
 
 # (5) model summary
 summary(larval_density_gaussian_linear)
-model_summary(larval_density_gaussian_linear, model_name = "Larval density", transform_estimate = NULL)
-model_forest_plot(larval_density_gaussian_linear, model_name = "Larval density", transform_estimate = NULL)
+model_summary(larval_density_gaussian_linear, transform_estimate = NULL)
+model_forest_plot(larval_density_gaussian_linear, transform_estimate = NULL)
 Anova(larval_density_gaussian_linear, type = 2)
 # confint(profile(larval_density_gaussian_linear)) %>% view
 
@@ -782,8 +780,8 @@ lrtest(carcass_weight_loss_gaussian_quadratic, carcass_weight_loss_gaussian_quad
 
 # (5) model summary
 summary(carcass_weight_loss_gaussian_quadratic)
-model_summary(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
-model_forest_plot(carcass_weight_loss_gaussian_quadratic, model_name = "Carcass weight loss", transform_estimate = NULL)
+model_summary(carcass_weight_loss_gaussian_quadratic, transform_estimate = NULL)
+model_forest_plot(carcass_weight_loss_gaussian_quadratic, transform_estimate = NULL)
 Anova(carcass_weight_loss_gaussian_quadratic, type = 2)
 # confint(profile(carcass_weight_loss_gaussian_quadratic)) %>% view
 
@@ -853,8 +851,8 @@ lrtest(prop_carcass_used_beta_linear, prop_carcass_used_beta_linear_null)  # mod
 
 # (5) model summary
 summary(prop_carcass_used_beta_linear)
-model_summary(prop_carcass_used_beta_linear, model_name = "Proportion of carcass used", transform_estimate = "exp")
-model_forest_plot(prop_carcass_used_beta_linear, model_name = "Proportion of carcass used", transform_estimate = "exp")
+model_summary(prop_carcass_used_beta_linear, transform_estimate = "exp")
+model_forest_plot(prop_carcass_used_beta_linear, transform_estimate = "exp")
 Anova(prop_carcass_used_beta_linear, type = 2)
 # confint(profile(prop_carcass_used_beta_linear)) %>% view
 
@@ -908,8 +906,8 @@ lrtest(average_larval_mass_larval_density_gaussian_linear, average_larval_mass_l
 
 # (4) model summary
 summary(average_larval_mass_larval_density_gaussian_linear)
-model_summary(average_larval_mass_larval_density_gaussian_linear, model_name = "Average larval mass vs. Larval density", transform_estimate = "exp")
-model_forest_plot(average_larval_mass_larval_density_gaussian_linear, model_name = "Average larval mass vs. Larval density", transform_estimate = "exp")
+model_summary(average_larval_mass_larval_density_gaussian_linear, transform_estimate = "exp")
+model_forest_plot(average_larval_mass_larval_density_gaussian_linear, transform_estimate = "exp")
 Anova(average_larval_mass_larval_density_gaussian_linear, type = 2)
 # confint(profile(average_larval_mass_larval_density_gaussian_linear)) %>% view
 
