@@ -3,7 +3,7 @@
 ##
 ## Author: Gen-Chang Hsu
 ##
-## Date: 2024-05-18
+## Date: 2024-05-27
 ##
 ## Description:
 ## 1. Plot the relationship between clutch size vs. carcass weight and carcass type
@@ -25,7 +25,19 @@
 ## 15. Plot the relationship between average larval mass vs. carcass taxon
 ## 16. Plot the relationship between proportion of carcass used vs. carcass taxon
 ## 17. Create a multipanel figure for the breeding outcomes
-## 
+## 18. Plot the relationship between protein content vs. carcass type
+## 19. Plot the relationship between fat content vs. carcass type
+## 20. Plot the relationship between protein content vs. carcass taxon
+## 21. Plot the relationship between fat content vs. carcass taxon
+## 22. Plot the relationship between larval growth vs. carcass type
+## 23. Plot the relationship between larval growth vs. carcass taxon
+## 24. Create a multipanel figure for the nutritional composition and larval growth
+## 25.1. Plot the relationship between protein content vs. larval growth (both lab and wild carcasses)
+## 25.2. Plot the relationship between protein content vs. larval growth (wild carcasses only)
+## 26.1. Plot the relationship between fat content vs. larval growth (both lab and wild carcasses)
+## 26.2. Plot the relationship between fat content vs. larval growth (wild carcasses only)
+## 27. Create a multipanel figure for the nutritional composition vs. larval growth
+##
 ## -----------------------------------------------------------------------------
 set.seed(123)
 
@@ -173,7 +185,7 @@ as.ggplot(gtable_breeding_success)
 ggsave("./03_Outputs/Figures/Breeding_Success_Carcass_Weight.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
-# 3. Proportion of eggs developed vs. carcass weight and carcass ---------------
+# 3. Proportion of eggs developed vs. carcass weight and carcass type ----------
 ### Convert the zeros to 0.001 and values larger than 1 to 0.999
 carcass_data_clean_prop_eggs_developed <- carcass_data_clean %>% 
   mutate(prop_eggs_developed = case_when(prop_eggs_developed >= 1 ~ 0.999,
@@ -737,6 +749,47 @@ p_prop_carcass_used_taxon_multipanel <- ggplot(carcass_data_clean_wild_restricte
   (p_average_larval_mass_taxon_multipanel + p_prop_carcass_used_taxon_multipanel)
 
 ggsave("./03_Outputs/Figures/Breeding_Outcomes_Taxon.tiff", width = 8, height = 7.5, dpi = 600, device = "tiff")
+
+
+# 18. Protein content vs. carcass type -----------------------------------------
+
+
+# 19. Fat content vs. carcass type ---------------------------------------------
+
+
+# 20. Protein content vs. carcass taxon ----------------------------------------
+
+
+# 21. Fat content vs. carcass taxon --------------------------------------------
+
+
+# 22. Larval growth vs. carcass type -------------------------------------------
+
+
+# 23. Larval growth vs. carcass taxon ------------------------------------------
+
+
+# 24. Multipanel figure for the nutritional composition and larval growth ------
+
+
+# 25.1. Larval growth vs. protein content (both lab and wild carcasses) --------
+
+
+# 25.2. Larval growth vs. protein content (wild carcasses only) ----------------
+
+
+# 26.1. Larval growth vs. fat content (both lab and wild carcasses) ------------
+
+
+# 26.2. Larval growth vs. fat content (wild carcasses only) --------------------
+
+
+# 27. Multipanel figure for the nutritional composition vs. larval growth ------
+
+
+
+
+
 
 
 

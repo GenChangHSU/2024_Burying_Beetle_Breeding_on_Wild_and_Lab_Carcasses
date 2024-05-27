@@ -291,7 +291,7 @@ write_rds(larval_growth_gaussian_carcass_taxon, "./03_Outputs/Data_Clean/larval_
 # 7. Larval growth vs. nutritional content for lab and wild carcasses ----------
 ### Model
 # (1) fit the model
-larval_growth_gaussian_nutrition_all <- glmmTMB(end_larval_mass_g ~ mean_prop_protein + mean_prop_fat + initial_larval_mass_g + (1|block_id) + (1|family_id),
+larval_growth_gaussian_nutrition_all <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + initial_larval_mass_g + (1|family_id),
                                                 data = larval_growth_data_clean,
                                                 family = "gaussian",
                                                 na.action = na.omit)
@@ -330,7 +330,7 @@ write_rds(larval_growth_gaussian_nutrition_all, "./03_Outputs/Data_Clean/larval_
 # 8. Larval growth vs. nutritional content for wild carcasses ------------------
 ### Model
 # (1) fit the model
-larval_growth_gaussian_nutrition_wild <- glmmTMB(end_larval_mass_g ~ mean_prop_protein + mean_prop_fat + tissue_type + initial_larval_mass_g + (1|block_id) + (1|family_id),
+larval_growth_gaussian_nutrition_wild <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + tissue_type + initial_larval_mass_g + (1|family_id),
                                                  data = filter(larval_growth_data_clean, carcass_type == "wild"),
                                                  family = "gaussian",
                                                  na.action = na.omit)
