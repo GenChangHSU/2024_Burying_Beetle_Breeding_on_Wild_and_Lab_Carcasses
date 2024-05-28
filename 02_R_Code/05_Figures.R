@@ -937,35 +937,102 @@ ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth.tiff", width = 8, height = 
 
 
 # 25.1. Larval growth vs. protein content (both lab and wild carcasses) --------
+ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of protein (%)", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Prop_Protein_Larval_Growth_Lab_Wild.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
 # 25.2. Larval growth vs. protein content (wild carcasses only) ----------------
+ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of protein (%)", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Prop_Protein_Larval_Growth_Wild.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
 # 26.1. Larval growth vs. fat content (both lab and wild carcasses) ------------
+ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of fat (%)", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Prop_Fat_Larval_Growth_Lab_Wild.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
 # 26.2. Larval growth vs. fat content (wild carcasses only) --------------------
+ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "solid", se = T, color = "black") + 
+  scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of fat (%)", y = "Larval growth (g)") + 
+  my_ggtheme
+
+ggsave("./03_Outputs/Figures/Prop_Fat_Larval_Growth_Wild.tiff", width = 5, height = 4, dpi = 600, device = "tiff")
 
 
 # 27. Multipanel figure for the nutritional composition vs. larval growth ------
 ### Panel (a)
-
+p_prop_protein_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of protein (%)", y = "Larval growth (g)", subtitle = "(a)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
 
 ### Panel (b)
-
+p_prop_fat_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) + 
+  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of fat (%)", y = "Larval growth (g)", subtitle = "(b)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
 
 ### Panel (c)
-
+p_prop_protein_larval_growth_wild <- ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+  scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of protein (%)", y = "Larval growth (g)", subtitle = "(c)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
 
 ### Panel (d)
+p_prop_fat_larval_growth_wild <- ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
+  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
+  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "solid", se = T, color = "black") + 
+  scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
+  scale_y_continuous(limits = c(0, 0.155)) +
+  labs(x = "Proportion of fat (%)", y = "Larval growth (g)", subtitle = "(d)") + 
+  my_ggtheme + 
+  theme(plot.subtitle = element_text(size = 16),
+        plot.margin = margin(r = 20, b = 5))
 
+(p_prop_protein_larval_growth_lab_wild + p_prop_fat_larval_growth_lab_wild)/
+  (p_prop_protein_larval_growth_wild + p_prop_fat_larval_growth_wild)
 
-
-(p_protein_content_carcass_type + p_protein_content_carcass_taxon)/
-  (p_fat_content_carcass_type + p_fat_content_carcass_taxon)
-
-ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth_Regression.tiff", width = 8, height = 10.5, dpi = 600, device = "tiff")
+ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth_Regression.tiff", width = 8, height = 7, dpi = 600, device = "tiff")
 
 
 
