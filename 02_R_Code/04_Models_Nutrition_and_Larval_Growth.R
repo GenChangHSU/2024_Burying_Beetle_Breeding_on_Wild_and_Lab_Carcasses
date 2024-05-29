@@ -83,7 +83,7 @@ write_rds(prop_protein_beta_carcass_type, "./03_Outputs/Data_Clean/prop_protein_
 # 2. Fat content of lab vs. wild carcasses ----------------------------
 ### Add a small value to avoid zero issue
 nutrition_data_clean_fat <- nutrition_data_clean %>% 
-  mutate(prop_fat = prop_fat + 0.001)
+  mutate(prop_fat = if_else(prop_fat == 0, 0.00000001, prop_fat))
 
 ### Model
 # (1) fit the model
@@ -167,12 +167,13 @@ write_rds(prop_protein_beta_carcass_taxon, "./03_Outputs/Data_Clean/prop_protein
 # 4. Fat content of wild carcass taxa ------------------------------------------
 ### Add a small value to avoid zero issue
 nutrition_data_clean_fat <- nutrition_data_clean %>% 
-  mutate(prop_fat = prop_fat + 0.001)
+  mutate(prop_fat = if_else(prop_fat == 0, 0.00000001, prop_fat)) %>% 
+  mutate(carcass_id = as.factor(carcass_id))
 
 ### Model
 # (1) fit the model
 prop_fat_beta_carcass_taxon <- glmmTMB(prop_fat ~ carcass_taxon + tissue_type + (1|carcass_id),
-                                       data = nutrition_data_clean_fat,
+                                       data = filter(nutrition_data_clean_fat, carcass_type == "wild"),
                                        family = beta_family("logit"),
                                        na.action = na.omit)
 
@@ -182,7 +183,7 @@ check_model(prop_fat_beta_carcass_taxon)
 
 # (3) model significance
 prop_fat_beta_carcass_taxon_null <- glmmTMB(prop_fat ~ 1,
-                                            data = nutrition_data_clean_fat,
+                                            data = filter(nutrition_data_clean_fat, carcass_type == "wild"),
                                             family = beta_family("logit"),
                                             na.action = na.omit)
 
@@ -364,13 +365,6 @@ plot_model(larval_growth_gaussian_nutrition_wild,
 
 # (7) write the model results
 write_rds(larval_growth_gaussian_nutrition_wild, "./03_Outputs/Data_Clean/larval_growth_gaussian_nutrition_wild.rds")
-
-
-
-
-
-
-
 
 
 

@@ -873,7 +873,8 @@ p_protein_content_carcass_taxon <- ggplot(filter(nutrition_data_clean, carcass_t
   my_ggtheme + 
   theme(plot.subtitle = element_text(size = 16),
         axis.title.y = element_text(size = 16, margin = margin(r = 10, l = 2)),
-        plot.margin = margin(r = 20, b = 5))
+        plot.margin = margin(r = 20, b = 5)) + 
+  annotate(geom = "text", x = c(1, 2, 3), y = c(0.5, 0.5, 0.4), label = c("a", "a", "b"), size = 6)
 
 ### Panel (c)
 p_fat_content_carcass_type <- ggplot(nutrition_data_clean) + 
