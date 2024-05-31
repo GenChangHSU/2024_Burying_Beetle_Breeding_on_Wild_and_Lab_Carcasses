@@ -188,7 +188,7 @@ larval_growth_data_clean <- larval_growth_data_raw %>%
                 carcass_type = tr,
                 carcass_taxon = carc.type,
                 tissue_type = type,
-                tissue_replication = rep,
+                larva_replication = rep,
                 tissue_mass_g = mass,
                 family_id = family,
                 success = success,
