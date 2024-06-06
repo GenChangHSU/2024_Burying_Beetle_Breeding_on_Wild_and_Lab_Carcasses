@@ -925,7 +925,7 @@ p_larval_growth_carcass_taxon <- ggplot(filter(larval_growth_data_clean, carcass
   scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
   scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
   scale_color_manual(values = color_pal) + 
-  labs(x = "Carcass taxon", y = "Larval growth (g)") + 
+  labs(x = "Carcass taxon", y = "Larval growth (g)", subtitle = "(f)") + 
   my_ggtheme + 
   theme(plot.subtitle = element_text(size = 16),
         plot.margin = margin(r = 20, b = 5))
