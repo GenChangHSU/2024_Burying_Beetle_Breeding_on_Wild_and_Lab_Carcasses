@@ -48,6 +48,7 @@ library(sjPlot)
 library(grid)
 library(ggplotify)
 library(patchwork)
+library(ggeffects)
 
 
 # Import files -----------------------------------------------------------------
@@ -938,9 +939,13 @@ ggsave("./03_Outputs/Figures/Nutrition_Larval_Growth.tiff", width = 8, height = 
 
 
 # 25.1. Larval growth vs. protein content (both lab and wild carcasses) --------
-ggplot(larval_growth_data_clean) + 
-  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+larval_growth_gaussian_nutrition_all_predict_protein <- ggpredict(larval_growth_gaussian_nutrition_all, 
+                                                          terms = c("mean_prop_protein [0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34, 0.35]"))
+
+ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_all_predict_protein, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_all_predict_protein, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = larval_growth_data_clean, aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of protein (%)", y = "Larval growth (g)") + 
@@ -950,9 +955,13 @@ ggsave("./03_Outputs/Figures/Prop_Protein_Larval_Growth_Lab_Wild.tiff", width = 
 
 
 # 25.2. Larval growth vs. protein content (wild carcasses only) ----------------
-ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
-  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+larval_growth_gaussian_nutrition_wild_predict_protein <- ggpredict(larval_growth_gaussian_nutrition_wild, 
+                                                          terms = c("mean_prop_protein [0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34, 0.35]"))
+
+ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_wild_predict_protein, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_wild_predict_protein, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = filter(larval_growth_data_clean, carcass_type == "wild"), aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of protein (%)", y = "Larval growth (g)") + 
@@ -962,9 +971,13 @@ ggsave("./03_Outputs/Figures/Prop_Protein_Larval_Growth_Wild.tiff", width = 5, h
 
 
 # 26.1. Larval growth vs. fat content (both lab and wild carcasses) ------------
-ggplot(larval_growth_data_clean) + 
-  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+larval_growth_gaussian_nutrition_all_predict_fat <- ggpredict(larval_growth_gaussian_nutrition_all, 
+                                                                  terms = c("mean_prop_fat [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.105]"))
+
+ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_all_predict_fat, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_all_predict_fat, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = larval_growth_data_clean, aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of fat (%)", y = "Larval growth (g)") + 
@@ -974,9 +987,13 @@ ggsave("./03_Outputs/Figures/Prop_Fat_Larval_Growth_Lab_Wild.tiff", width = 5, h
 
 
 # 26.2. Larval growth vs. fat content (wild carcasses only) --------------------
-ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
-  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "solid", se = T, color = "black") + 
+larval_growth_gaussian_nutrition_wild_predict_fat <- ggpredict(larval_growth_gaussian_nutrition_wild, 
+                                                              terms = c("mean_prop_fat [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.105]"))
+
+ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_wild_predict_fat, aes(x = x, y = predicted)) +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_wild_predict_fat, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = filter(larval_growth_data_clean, carcass_type == "wild"), aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of fat (%)", y = "Larval growth (g)") + 
@@ -987,9 +1004,10 @@ ggsave("./03_Outputs/Figures/Prop_Fat_Larval_Growth_Wild.tiff", width = 5, heigh
 
 # 27. Multipanel figure for the nutritional composition vs. larval growth ------
 ### Panel (a)
-p_prop_protein_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) + 
-  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+p_prop_protein_larval_growth_lab_wild <- ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_all_predict_protein, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_all_predict_protein, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = larval_growth_data_clean, aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of protein (%)", y = "Larval growth (g)", subtitle = "(a)") + 
@@ -998,9 +1016,10 @@ p_prop_protein_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) +
         plot.margin = margin(r = 20, b = 5))
 
 ### Panel (b)
-p_prop_fat_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) + 
-  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+p_prop_fat_larval_growth_lab_wild <- ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_all_predict_fat, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_all_predict_fat, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = larval_growth_data_clean, aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of fat (%)", y = "Larval growth (g)", subtitle = "(b)") + 
@@ -1009,9 +1028,10 @@ p_prop_fat_larval_growth_lab_wild <- ggplot(larval_growth_data_clean) +
         plot.margin = margin(r = 20, b = 5))
 
 ### Panel (c)
-p_prop_protein_larval_growth_wild <- ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
-  geom_point(aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_protein, y = larval_weight_gain_g), method = "lm", linetype = "dashed", se = F, color = "black") + 
+p_prop_protein_larval_growth_wild <- ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_wild_predict_protein, aes(x = x, y = predicted), linetype = "dashed") +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_wild_predict_protein, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = filter(larval_growth_data_clean, carcass_type == "wild"), aes(x = mean_prop_protein, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(0.14, 0.36), expand = c(0, 0), labels = c(15, 20, 25, 30, 35)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of protein (%)", y = "Larval growth (g)", subtitle = "(c)") + 
@@ -1020,9 +1040,10 @@ p_prop_protein_larval_growth_wild <- ggplot(filter(larval_growth_data_clean, car
         plot.margin = margin(r = 20, b = 5))
 
 ### Panel (d)
-p_prop_fat_larval_growth_wild <- ggplot(filter(larval_growth_data_clean, carcass_type == "wild")) + 
-  geom_point(aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
-  geom_smooth(aes(x = mean_prop_fat, y = larval_weight_gain_g), method = "lm", linetype = "solid", se = T, color = "black") + 
+p_prop_fat_larval_growth_wild <- ggplot() + 
+  geom_line(data = larval_growth_gaussian_nutrition_wild_predict_fat, aes(x = x, y = predicted)) +
+  geom_ribbon(data = larval_growth_gaussian_nutrition_wild_predict_fat, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.15) + 
+  geom_point(data = filter(larval_growth_data_clean, carcass_type == "wild"), aes(x = mean_prop_fat, y = larval_weight_gain_g)) + 
   scale_x_continuous(limits = c(-0.01, 0.11), expand = c(0, 0), labels = c(0, 2.5, 5, 7.5, 10)) +
   scale_y_continuous(limits = c(0, 0.155)) +
   labs(x = "Proportion of fat (%)", y = "Larval growth (g)", subtitle = "(d)") + 
