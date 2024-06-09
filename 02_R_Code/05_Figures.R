@@ -67,7 +67,8 @@ larval_density_gaussian_linear <- read_rds("./03_Outputs/Data_Clean/larval_densi
 carcass_weight_loss_gaussian_quadratic <- read_rds("./03_Outputs/Data_Clean/carcass_weight_loss_gaussian_quadratic.rds")
 prop_carcass_used_beta_linear <- read_rds("./03_Outputs/Data_Clean/prop_carcass_used_beta_linear.rds")
 average_larval_mass_larval_density_gaussian_linear <- read_rds("./03_Outputs/Data_Clean/average_larval_mass_larval_density_gaussian_linear.rds")
-
+larval_growth_gaussian_nutrition_all <- read_rds("./03_Outputs/Data_Clean/larval_growth_gaussian_nutrition_all.rds")
+larval_growth_gaussian_nutrition_wild <- read_rds("./03_Outputs/Data_Clean/larval_growth_gaussian_nutrition_wild.rds")
 
 # ggplot theme -----------------------------------------------------------------
 my_ggtheme <- 

@@ -291,19 +291,19 @@ write_rds(larval_growth_gaussian_carcass_taxon, "./03_Outputs/Data_Clean/larval_
 
 # 7. Larval growth vs. nutritional content for lab and wild carcasses ----------
 ### Model
-# (1) test interaction term
-larval_growth_gaussian_nutrition_all <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein * mean_prop_fat + initial_larval_mass_g + (1|family_id),
+# (1) fit the model
+larval_growth_gaussian_nutrition_all <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + initial_larval_mass_g + (1|family_id),
                                                 data = larval_growth_data_clean,
                                                 family = "gaussian",
                                                 na.action = na.omit)
 
-larval_growth_gaussian_nutrition_all_wo_interaction <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + initial_larval_mass_g + (1|family_id),
-                                                data = larval_growth_data_clean,
-                                                family = "gaussian",
-                                                na.action = na.omit)
-
-AIC(larval_growth_gaussian_nutrition_all, larval_growth_gaussian_nutrition_all_wo_interaction)
-lrtest(larval_growth_gaussian_nutrition_all, larval_growth_gaussian_nutrition_all_wo_interaction)
+# larval_growth_gaussian_nutrition_all_with_interaction <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein * mean_prop_fat + initial_larval_mass_g + (1|family_id),
+#                                                 data = larval_growth_data_clean,
+#                                                 family = "gaussian",
+#                                                 na.action = na.omit)
+# 
+# AIC(larval_growth_gaussian_nutrition_all, larval_growth_gaussian_nutrition_all_with_interaction)
+# lrtest(larval_growth_gaussian_nutrition_all, larval_growth_gaussian_nutrition_all_with_interaction)
 
 # (2) model diagnostics
 plot(simulateResiduals(larval_growth_gaussian_nutrition_all))  # no pattern
@@ -338,19 +338,19 @@ write_rds(larval_growth_gaussian_nutrition_all, "./03_Outputs/Data_Clean/larval_
 
 # 8. Larval growth vs. nutritional content for wild carcasses ------------------
 ### Model
-# (1) test interaction term
-larval_growth_gaussian_nutrition_wild <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein * mean_prop_fat + tissue_type + initial_larval_mass_g + (1|family_id),
+# (1) fit the model
+larval_growth_gaussian_nutrition_wild <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + tissue_type + initial_larval_mass_g + (1|family_id),
                                                  data = filter(larval_growth_data_clean, carcass_type == "wild"),
                                                  family = "gaussian",
                                                  na.action = na.omit)
 
-larval_growth_gaussian_nutrition_wild_wo_interaction <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein + mean_prop_fat + tissue_type + initial_larval_mass_g + (1|family_id),
+larval_growth_gaussian_nutrition_wild_with_interaction <- glmmTMB(larval_weight_gain_g ~ mean_prop_protein * mean_prop_fat + tissue_type + initial_larval_mass_g + (1|family_id),
                                                  data = filter(larval_growth_data_clean, carcass_type == "wild"),
                                                  family = "gaussian",
                                                  na.action = na.omit)
 
-lrtest(larval_growth_gaussian_nutrition_wild, larval_growth_gaussian_nutrition_wild_wo_interaction)  # interaction term not significant
-AIC(larval_growth_gaussian_nutrition_wild, larval_growth_gaussian_nutrition_wild_wo_interaction)  # model without interaction is better
+lrtest(larval_growth_gaussian_nutrition_wild, larval_growth_gaussian_nutrition_wild_with_interaction)  # interaction term not significant
+AIC(larval_growth_gaussian_nutrition_wild, larval_growth_gaussian_nutrition_wild_with_interaction)  # model without interaction is better
 
 # (2) model diagnostics
 plot(simulateResiduals(larval_growth_gaussian_nutrition_wild))  # no pattern
@@ -381,6 +381,4 @@ plot_model(larval_growth_gaussian_nutrition_wild,
 
 # (7) write the model results
 write_rds(larval_growth_gaussian_nutrition_wild, "./03_Outputs/Data_Clean/larval_growth_gaussian_nutrition_wild.rds")
-
-
 
