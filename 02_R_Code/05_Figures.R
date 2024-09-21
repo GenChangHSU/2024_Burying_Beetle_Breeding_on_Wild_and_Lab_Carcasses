@@ -868,7 +868,7 @@ p_protein_content_carcass_taxon <- ggplot(filter(nutrition_data_clean, carcass_t
   geom_point(aes(x = carcass_taxon, y = prop_protein), alpha = 0.2, position = position_jitter(width = 0.05)) + 
   stat_summary(aes(x = carcass_taxon, y = prop_protein, color = carcass_taxon), 
                fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
-  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_x_discrete(limits = c("mammal", "bird", "reptile"), labels = c("Mammal", "Bird", "Reptile")) + 
   scale_y_continuous(limits = c(0.08, 0.62), expand = c(0, 0), labels = c("10", "20", "30", "40", "50", "60")) +
   scale_color_manual(values = color_pal) + 
   labs(x = "Carcass taxon", y = "Proportion of protein (%)", subtitle = "(b)") + 
@@ -897,7 +897,7 @@ p_fat_content_carcass_taxon <- ggplot(filter(nutrition_data_clean, carcass_type 
   geom_point(aes(x = carcass_taxon, y = prop_fat), alpha = 0.2, position = position_jitter(width = 0.05)) + 
   stat_summary(aes(x = carcass_taxon, y = prop_fat, color = carcass_taxon), 
                fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
-  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_x_discrete(limits = c("mammal", "bird", "reptile"), labels = c("Mammal", "Bird", "Reptile")) + 
   scale_y_continuous(limits = c(-0.02, 0.62), expand = c(0, 0), breaks = seq(0, 0.6, 0.1), labels = c("0", "10", "20", "30", "40", "50", "60")) +
   scale_color_manual(values = color_pal) + 
   labs(x = "Carcass taxon", y = "Proportion of fat (%)", subtitle = "(d)") + 
@@ -924,7 +924,7 @@ p_larval_growth_carcass_taxon <- ggplot(filter(larval_growth_data_clean, carcass
   geom_point(aes(x = carcass_taxon, y = larval_weight_gain_g), alpha = 0.2, position = position_jitter(width = 0.05)) + 
   stat_summary(aes(x = carcass_taxon, y = larval_weight_gain_g, color = carcass_taxon), 
                fun.data = "mean_se", size = 0.7, linewidth = 1, show.legend = F) + 
-  scale_x_discrete(labels = c("Mammal", "Bird", "Reptile")) + 
+  scale_x_discrete(limits = c("mammal", "bird", "reptile"), labels = c("Mammal", "Bird", "Reptile")) + 
   scale_y_continuous(limits = c(0, 0.21), expand = c(0, 0)) +
   scale_color_manual(values = color_pal) + 
   labs(x = "Carcass taxon", y = "Larval growth (g)", subtitle = "(f)") + 
