@@ -220,14 +220,18 @@ larval_growth_data_clean %>%
   group_by(carcass_taxon, tissue_type) %>% 
   summarise(n = n())
 
-### (3) Larval survival rates and growth on lab and wild carcasses
+### (3) Overall larval survival rates
+larval_growth_data_clean %>% 
+  summarise(prop_survived = sum(success)/n())
+
+### (4) Larval survival rates and growth on lab and wild carcasses
 larval_growth_data_clean %>% 
   group_by(carcass_type, tissue_type) %>% 
   summarise(n = n(),
             prop_survived = sum(success)/n,
             mean_larval_weight_gain_g = mean(larval_weight_gain_g, na.rm = T))
 
-### (4) Larval survival rates and growth on wild carcass taxa
+### (5) Larval survival rates and growth on wild carcass taxa
 larval_growth_data_clean %>% 
   filter(carcass_type == "wild") %>% 
   group_by(carcass_taxon, tissue_type) %>% 
