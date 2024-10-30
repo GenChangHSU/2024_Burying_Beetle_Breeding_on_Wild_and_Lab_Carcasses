@@ -1,6 +1,6 @@
 ## Carcass size, not source or taxon, dictates breeding performance and carcass use in a burying beetle
 
-__G-C. Hsu__, W-J. Lin, C-H. Hsieh, Y-J. Lee, and S-J. Sun. 2024. Carcass size, not source or taxon, dictates breeding performance and carcass use in a burying beetle. *Royal Society Open Science*. 11: 241265.
+__G-C. Hsu__<sup>†</sup>, W-J. Lin<sup>†</sup>, C-H. Hsieh, Y-J. Lee, and S-J. Sun. 2024. Carcass size, not source or taxon, dictates breeding performance and carcass use in a burying beetle. *Royal Society Open Science*. 11: 241265. (<sup>†</sup>Equal contribution)
 
 ## Abstract
 
